@@ -208,7 +208,7 @@ ul {
 
 .shell {
   display: grid;
-  grid-template-columns: 230px 1fr;
+  grid-template-columns: 270px 1fr;
   gap: 28px;
   align-items: start;
 }
@@ -929,10 +929,22 @@ details.project-move[open] summary {
   font-size: var(--fs-xl);
   margin: 8px 0 2px;
 }
-.drawer-area {
+details.drawer-move {
+  display: inline-block;
+  margin: 2px 0 0;
+}
+details.drawer-move summary {
+  border: none;
+  padding: 0;
   font-size: var(--fs-sm);
   color: var(--ink-soft);
-  margin: 0;
+}
+details.drawer-move summary:hover {
+  color: var(--accent);
+}
+details.drawer-move[open] summary {
+  color: var(--accent);
+  border: none;
 }
 .drawer-list {
   display: flex;

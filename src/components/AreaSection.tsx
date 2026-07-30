@@ -1,5 +1,5 @@
 import { useState, type DragEvent } from "react";
-import type { AreaOfResponsibility, Project } from "../types";
+import type { Project } from "../types";
 import { ProjectTreeRow } from "./ProjectTreeRow";
 
 interface AreaSectionProps {
@@ -7,7 +7,6 @@ interface AreaSectionProps {
   areaId: string | undefined;
   title: string;
   projects: Project[];
-  allAreas: AreaOfResponsibility[];
   openTaskCount: (projectId: string) => number;
   onOpenProject: (projectId: string) => void;
   onMoveProject: (projectId: string, areaId: string | undefined) => void;
@@ -15,14 +14,14 @@ interface AreaSectionProps {
 
 /**
  * One collapsible node in the Areas of Responsibility tree, and a drop
- * target for reassigning a project by dragging it here — the accessible
- * equivalent is each row's own "Move to" menu (ProjectTreeRow).
+ * target for reassigning a project by dragging it here. The accessible
+ * equivalent (for keyboard/touch) is the "Move to area" control in the
+ * project's own drawer, not a per-row control — see ProjectTreeRow.
  */
 export function AreaSection({
   areaId,
   title,
   projects,
-  allAreas,
   openTaskCount,
   onOpenProject,
   onMoveProject,
@@ -70,10 +69,8 @@ export function AreaSection({
               <ProjectTreeRow
                 key={project.id}
                 project={project}
-                areas={allAreas}
                 openTaskCount={openTaskCount(project.id)}
                 onOpenProject={onOpenProject}
-                onMove={(target) => onMoveProject(project.id, target)}
               />
             ))
           )}

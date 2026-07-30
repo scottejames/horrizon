@@ -81,8 +81,20 @@ bucket — rather than a flat list with one add-form wired to each area. There
 is exactly one "+" control for a new area and one for a new project, both
 hidden until clicked; a newly-created project always lands in Unassigned.
 Organizing it into an area is a deliberate second step (drag the row onto an
-area, or use its "Move ▾" menu), the same capture-now/organize-later split
-the app already uses for tasks (quick-add now, triage into a horizon later).
-Drag-and-drop is the fluid path; the "Move ▾" dropdown is the accessible
-equivalent and the only path on touch/keyboard — don't let the drag
-interaction become the sole way to reassign a project.
+area, or open the project's drawer and use its "Move to area" control), the
+same capture-now/organize-later split the app already uses for tasks
+(quick-add now, triage into a horizon later). Drag-and-drop is the fluid
+path; the drawer's dropdown is the accessible equivalent and the only path
+on touch/keyboard — don't let the drag interaction become the sole way to
+reassign a project.
+
+**Revised 2026-07-30, same day**: the "Move ▾" control originally lived on
+the tree row itself, but the sidebar column is narrow (see a real screenshot
+of it in this session) and a per-row button left almost no width for the
+project name — "Kitchen Remodel" was rendering as "C…". Moved it into the
+project's drawer instead, where there's room, and widened the sidebar column
+(230px → 270px) as a companion fix. The tree row itself now shows only a
+drag handle, code, name, and open-task count — drag-and-drop is the only
+in-tree move affordance; the drawer is the only place to reassign it without
+dragging. If a future change adds a row-level control back, budget its width
+against the name column first, not after.

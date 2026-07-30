@@ -9,9 +9,10 @@ interface ProjectDrawerProps {
 }
 
 export function ProjectDrawer({ projectId, onClose }: ProjectDrawerProps) {
-  const { projects, areas } = useProjectStore();
+  const { projects, areas, moveProjectToArea } = useProjectStore();
   const { tasksByProject } = useTaskStore();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const moveDetailsRef = useRef<HTMLDetailsElement>(null);
 
   const project = projectId ? projects.find((item) => item.id === projectId) : undefined;
   const isOpen = Boolean(projectId && project);
@@ -30,6 +31,12 @@ export function ProjectDrawer({ projectId, onClose }: ProjectDrawerProps) {
 
   const area = project?.areaId ? areas.find((item) => item.id === project.areaId) : undefined;
   const linkedTasks = projectId ? tasksByProject(projectId) : [];
+  const moveTargets = areas.filter((candidate) => candidate.id !== project?.areaId);
+
+  function handleMove(areaId: string | undefined) {
+    if (project) moveProjectToArea(project.id, areaId);
+    if (moveDetailsRef.current) moveDetailsRef.current.open = false;
+  }
 
   return (
     <>
@@ -59,7 +66,24 @@ export function ProjectDrawer({ projectId, onClose }: ProjectDrawerProps) {
             <div className="drawer-header">
               <span className="drawer-code">#{project.shortCode}</span>
               <h2 id="drawerTitle">{project.name}</h2>
-              <p className="drawer-area">{area ? area.name : "No area"}</p>
+              <details className="project-move drawer-move" ref={moveDetailsRef}>
+                <summary>{area ? area.name : "No area"} <span aria-hidden="true">▾</span></summary>
+                <div className="project-move-menu">
+                  {moveTargets.map((candidate) => (
+                    <button key={candidate.id} type="button" onClick={() => handleMove(candidate.id)}>
+                      {candidate.name}
+                    </button>
+                  ))}
+                  {project.areaId && (
+                    <button type="button" onClick={() => handleMove(undefined)}>
+                      No area
+                    </button>
+                  )}
+                  {moveTargets.length === 0 && !project.areaId && (
+                    <span className="project-move-empty">No areas yet</span>
+                  )}
+                </div>
+              </details>
             </div>
             <ul className="drawer-list">
               {linkedTasks.length === 0 ? (

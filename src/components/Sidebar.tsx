@@ -59,7 +59,6 @@ export function Sidebar({ onOpenProject, onOpenSomeday }: SidebarProps) {
           areaId={area.id}
           title={area.name}
           projects={projects.filter((project) => project.areaId === area.id)}
-          allAreas={areas}
           openTaskCount={openTaskCount}
           onOpenProject={onOpenProject}
           onMoveProject={moveProjectToArea}
@@ -70,7 +69,6 @@ export function Sidebar({ onOpenProject, onOpenSomeday }: SidebarProps) {
         areaId={undefined}
         title="Unassigned"
         projects={unassignedProjects}
-        allAreas={areas}
         openTaskCount={openTaskCount}
         onOpenProject={onOpenProject}
         onMoveProject={moveProjectToArea}
