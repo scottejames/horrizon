@@ -164,8 +164,8 @@ ul {
 }
 .brand {
   display: flex;
-  align-items: baseline;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
 }
 .brand-mark {
@@ -178,6 +178,8 @@ ul {
   font-size: var(--fs-sm);
   color: var(--ink-soft);
   font-style: italic;
+  align-self: flex-end;
+  margin-bottom: 3px;
 }
 .appbar-right {
   display: flex;

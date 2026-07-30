@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CaptureBar } from "./components/CaptureBar";
 import { HorizonTabs } from "./components/HorizonTabs";
+import { Logo } from "./components/Logo";
 import { ProjectDrawer } from "./components/ProjectDrawer";
 import { Sidebar } from "./components/Sidebar";
 import { TaskList } from "./components/TaskList";
@@ -45,6 +46,7 @@ export default function App() {
     <div className="app">
       <header className="appbar">
         <div className="brand">
+          <Logo />
           <span className="brand-mark">Horizon</span>
           <span className="brand-tag">today's list, tomorrow's plan</span>
         </div>

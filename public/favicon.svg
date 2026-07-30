@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+  <style>
+    .someday { fill: #8b7a94; }
+    .week { fill: #5b6fa8; }
+    .tomorrow { fill: #3e8e82; }
+    .today { fill: #dd7a33; }
+    @media (prefers-color-scheme: dark) {
+      .someday { fill: #a594ac; }
+      .week { fill: #7c8fcb; }
+      .tomorrow { fill: #55a79a; }
+      .today { fill: #f0924d; }
+    }
+  </style>
+  <circle class="someday" cx="20" cy="20" r="20" />
+  <circle class="week" cx="20" cy="20" r="15" />
+  <circle class="tomorrow" cx="20" cy="20" r="10" />
+  <circle class="today" cx="20" cy="20" r="5" />
+</svg>
