@@ -1,0 +1,45 @@
+import { useProjectStore } from "../context/ProjectStoreContext";
+import { useTaskStore } from "../context/TaskStoreContext";
+import { HORIZON_INTRO } from "../lib/horizon";
+import type { Horizon, Task } from "../types";
+import { TaskRow } from "./TaskRow";
+
+interface TaskListProps {
+  horizon: Horizon;
+  onOpenProject: (projectId: string) => void;
+  onMoved: (target: Horizon, wasSomeday: boolean) => void;
+}
+
+export function TaskList({ horizon, onOpenProject, onMoved }: TaskListProps) {
+  const { tasksByHorizon, toggleDone, moveTask } = useTaskStore();
+  const { projects } = useProjectStore();
+  const tasks = tasksByHorizon(horizon);
+
+  function handleMove(task: Task, target: Horizon) {
+    const wasSomeday = task.horizon === "someday";
+    moveTask(task.id, target);
+    onMoved(target, wasSomeday);
+  }
+
+  return (
+    <>
+      <p className="panel-intro">{HORIZON_INTRO[horizon]}</p>
+      {tasks.length === 0 ? (
+        <p className="panel-empty">Nothing here yet.</p>
+      ) : (
+        <ul className="task-list">
+          {tasks.map((task) => (
+            <TaskRow
+              key={task.id}
+              task={task}
+              project={projects.find((project) => project.id === task.projectId)}
+              onToggleDone={() => toggleDone(task.id)}
+              onMove={(target) => handleMove(task, target)}
+              onOpenProject={onOpenProject}
+            />
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
