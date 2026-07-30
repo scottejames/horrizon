@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { useProjectStore } from "../context/ProjectStoreContext";
 import { useTaskStore } from "../context/TaskStoreContext";
+import { AreaSection } from "./AreaSection";
 import { InlineAddForm } from "./InlineAddForm";
 
 interface SidebarProps {
@@ -8,69 +10,86 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onOpenProject, onOpenSomeday }: SidebarProps) {
-  const { programs, projects, addProgram, addProject } = useProjectStore();
+  const { areas, projects, addArea, addProject, moveProjectToArea } = useProjectStore();
   const { tasks } = useTaskStore();
+  const [addingArea, setAddingArea] = useState(false);
+  const [addingProject, setAddingProject] = useState(false);
 
-  function openCount(projectId: string): number {
+  function openTaskCount(projectId: string): number {
     return tasks.filter((task) => task.projectId === projectId && task.state !== "done").length;
   }
 
   const somedayCount = tasks.filter((task) => task.horizon === "someday").length;
-  const unassignedProjects = projects.filter((project) => !project.programId);
+  const unassignedProjects = projects.filter((project) => !project.areaId);
 
   return (
     <aside className="sidebar">
-      <h2 className="sidebar-title">Programs &amp; Projects</h2>
+      <div className="tree-header">
+        <h2 className="sidebar-title">Areas of Responsibility</h2>
+        <button
+          type="button"
+          className="tree-add-toggle"
+          aria-label="Add an area of responsibility"
+          onClick={() => setAddingArea((value) => !value)}
+        >
+          +
+        </button>
+      </div>
 
-      {programs.length === 0 && projects.length === 0 && (
-        <p className="sidebar-empty">Nothing set up yet — add a program or project below.</p>
+      {addingArea && (
+        <InlineAddForm
+          placeholder="e.g. Home, Health, Work"
+          onSubmit={(name) => {
+            addArea(name);
+            setAddingArea(false);
+          }}
+        />
       )}
 
-      {programs.map((program) => {
-        const programProjects = projects.filter((project) => project.programId === program.id);
-        return (
-          <div className="program" key={program.id}>
-            <h3 className="program-name">{program.name}</h3>
-            {programProjects.map((project) => (
-              <button
-                key={project.id}
-                type="button"
-                className="project-row"
-                onClick={() => onOpenProject(project.id)}
-              >
-                <span className="project-code">#{project.shortCode}</span>
-                <span className="project-name">{project.name}</span>
-                <span className="project-count">{openCount(project.id)}</span>
-              </button>
-            ))}
-            <InlineAddForm
-              placeholder={`New project in ${program.name}`}
-              onSubmit={(name) => addProject(name, program.id)}
-            />
-          </div>
-        );
-      })}
-
-      {unassignedProjects.length > 0 && (
-        <div className="program">
-          <h3 className="program-name">No program</h3>
-          {unassignedProjects.map((project) => (
-            <button
-              key={project.id}
-              type="button"
-              className="project-row"
-              onClick={() => onOpenProject(project.id)}
-            >
-              <span className="project-code">#{project.shortCode}</span>
-              <span className="project-name">{project.name}</span>
-              <span className="project-count">{openCount(project.id)}</span>
-            </button>
-          ))}
-        </div>
+      {areas.length === 0 && projects.length === 0 && (
+        <p className="sidebar-empty">
+          Nothing set up yet — group projects by the head space they belong to (Home, Health,
+          Work…) and drag projects between them.
+        </p>
       )}
 
-      <InlineAddForm placeholder="New program" onSubmit={addProgram} />
-      <InlineAddForm placeholder="New project (no program)" onSubmit={(name) => addProject(name)} />
+      {areas.map((area) => (
+        <AreaSection
+          key={area.id}
+          areaId={area.id}
+          title={area.name}
+          projects={projects.filter((project) => project.areaId === area.id)}
+          allAreas={areas}
+          openTaskCount={openTaskCount}
+          onOpenProject={onOpenProject}
+          onMoveProject={moveProjectToArea}
+        />
+      ))}
+
+      <AreaSection
+        areaId={undefined}
+        title="Unassigned"
+        projects={unassignedProjects}
+        allAreas={areas}
+        openTaskCount={openTaskCount}
+        onOpenProject={onOpenProject}
+        onMoveProject={moveProjectToArea}
+      />
+
+      {addingProject ? (
+        <InlineAddForm
+          placeholder="New project"
+          buttonLabel="Add"
+          onSubmit={(name) => {
+            addProject(name);
+            setAddingProject(false);
+          }}
+        />
+      ) : (
+        <button type="button" className="tree-add-project" onClick={() => setAddingProject(true)}>
+          + Add project
+        </button>
+      )}
 
       <div className="sidebar-footer">
         <button type="button" className="someday-link" onClick={onOpenSomeday}>

@@ -1,17 +1,18 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
 /**
- * Task/Project/Program schema, backed by DynamoDB via AppSync.
+ * Task/Project/AreaOfResponsibility schema, backed by DynamoDB via AppSync.
  *
  * `priority`, `horizon`, and `state` are plain strings rather than GraphQL
  * enums: their accepted values are expected to evolve (see
  * CODING_GUIDELINES.md #5), and an enum member can't be renamed without a
  * breaking schema change.
  *
- * `Task.projectId` / `Project.programId` are plain optional string fields,
- * not `belongsTo`/`hasMany` relations — detaching a project from a program,
- * or a task from a project, is ordinary application logic, not a cascade
- * delete a relation's own policy would otherwise impose.
+ * `Task.projectId` / `Project.areaId` are plain optional string fields, not
+ * `belongsTo`/`hasMany` relations — detaching a project from an area, or a
+ * task from a project, is ordinary application logic (including moving a
+ * project to a different area), not a cascade delete a relation's own
+ * policy would otherwise impose.
  */
 const schema = a.schema({
   Task: a
@@ -29,11 +30,11 @@ const schema = a.schema({
     .model({
       shortCode: a.string().required(),
       name: a.string().required(),
-      programId: a.string(),
+      areaId: a.string(),
     })
     .authorization((allow) => [allow.owner()]),
 
-  Program: a
+  AreaOfResponsibility: a
     .model({
       name: a.string().required(),
     })

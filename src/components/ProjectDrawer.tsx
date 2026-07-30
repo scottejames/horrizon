@@ -9,7 +9,7 @@ interface ProjectDrawerProps {
 }
 
 export function ProjectDrawer({ projectId, onClose }: ProjectDrawerProps) {
-  const { projects, programs } = useProjectStore();
+  const { projects, areas } = useProjectStore();
   const { tasksByProject } = useTaskStore();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -28,7 +28,7 @@ export function ProjectDrawer({ projectId, onClose }: ProjectDrawerProps) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  const program = project?.programId ? programs.find((item) => item.id === project.programId) : undefined;
+  const area = project?.areaId ? areas.find((item) => item.id === project.areaId) : undefined;
   const linkedTasks = projectId ? tasksByProject(projectId) : [];
 
   return (
@@ -59,7 +59,7 @@ export function ProjectDrawer({ projectId, onClose }: ProjectDrawerProps) {
             <div className="drawer-header">
               <span className="drawer-code">#{project.shortCode}</span>
               <h2 id="drawerTitle">{project.name}</h2>
-              <p className="drawer-program">{program ? program.name : "No program"}</p>
+              <p className="drawer-area">{area ? area.name : "No area"}</p>
             </div>
             <ul className="drawer-list">
               {linkedTasks.length === 0 ? (

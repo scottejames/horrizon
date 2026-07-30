@@ -24,13 +24,20 @@ account was enough for V0.
 ## Data: AppSync + DynamoDB
 
 `amplify/data/resource.ts` defines three models — `Task`, `Project`,
-`Program` — each backed by its own DynamoDB table via AppSync, each with its
-own explicit `allow.owner()` authorization rule (deny-by-default; see
-`CODING_GUIDELINES.md` #5). `priority`, `horizon`, and `state` are plain
-strings rather than GraphQL enums, and `Task.projectId` /
-`Project.programId` are plain optional string fields rather than
+`AreaOfResponsibility` — each backed by its own DynamoDB table via AppSync,
+each with its own explicit `allow.owner()` authorization rule
+(deny-by-default; see `CODING_GUIDELINES.md` #5). `priority`, `horizon`, and
+`state` are plain strings rather than GraphQL enums, and `Task.projectId` /
+`Project.areaId` are plain optional string fields rather than
 `belongsTo`/`hasMany` relations — both per the same section of the coding
 guidelines, and both already covered there with this exact schema in mind.
+
+`AreaOfResponsibility` was renamed from `Program` on 2026-07-30 (see
+`design-principles.md`'s "Programs are Areas of Responsibility" entry) — a
+genuine schema/table rename, not just a frontend label change. Any
+`Program`/`Project.programId` data already sitting in a deployed environment
+does not migrate automatically; at this stage that's only ever been our own
+test data, so it was an acceptable drop, not a real migration to plan for.
 
 The frontend never calls `generateClient()` with an implicit auth mode —
 `src/lib/dataClient.ts` sets `authMode: "userPool"` explicitly, since the

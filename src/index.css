@@ -244,18 +244,45 @@ ul {
   font-weight: 700;
   margin: 0 0 12px;
 }
-.program {
-  margin-bottom: 16px;
+.tree-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
-.program:last-of-type {
-  margin-bottom: 0;
+.tree-header .sidebar-title {
+  margin: 0;
 }
-.program-name {
+.tree-add-toggle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: none;
+  color: var(--ink-soft);
   font-size: var(--fs-sm);
-  font-weight: 600;
-  margin: 0 0 6px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 0;
 }
-.project-row {
+.tree-add-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tree-area {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  padding: 2px;
+}
+.tree-area.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-wash);
+}
+.tree-area-header {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -265,12 +292,90 @@ ul {
   border: none;
   border-radius: 8px;
   padding: 6px 8px;
-  margin: 0 -8px;
+  cursor: pointer;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+}
+.tree-area-header:hover {
+  background: var(--surface-2);
+}
+.tree-area-header .project-count {
+  margin-left: auto;
+}
+.disclosure {
+  display: inline-block;
+  font-size: 0.6rem;
+  color: var(--ink-soft);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+.disclosure.open {
+  transform: rotate(90deg);
+}
+.tree-project-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0 6px;
+  padding-left: 18px;
+}
+.tree-empty {
+  font-size: var(--fs-xxs);
+  color: var(--ink-soft);
+  font-style: italic;
+  padding: 6px 8px;
+}
+.tree-project {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 8px;
+  padding: 4px 6px;
+  cursor: grab;
+}
+.tree-project:active {
+  cursor: grabbing;
+}
+.tree-project:hover {
+  background: var(--surface-2);
+}
+.tree-drag-handle {
+  color: var(--ink-soft);
+  font-size: var(--fs-sm);
+  flex-shrink: 0;
+}
+.tree-project details.project-move {
+  flex-shrink: 0;
+}
+.tree-project-open {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
   color: var(--ink);
 }
-.project-row:hover {
-  background: var(--surface-2);
+.tree-add-project {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 1px dashed var(--border-strong);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-top: 4px;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.tree-add-project:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 .project-code {
   font-family: var(--font-mono);
@@ -671,10 +776,12 @@ ul {
 .task-actions {
   flex-shrink: 0;
 }
-details.defer {
+details.defer,
+details.project-move {
   position: relative;
 }
-details.defer summary {
+details.defer summary,
+details.project-move summary {
   list-style: none;
   cursor: pointer;
   font-size: var(--fs-xs);
@@ -685,18 +792,22 @@ details.defer summary {
   color: var(--ink-soft);
   white-space: nowrap;
 }
-details.defer summary::-webkit-details-marker {
+details.defer summary::-webkit-details-marker,
+details.project-move summary::-webkit-details-marker {
   display: none;
 }
-details.defer summary:hover {
+details.defer summary:hover,
+details.project-move summary:hover {
   color: var(--ink);
   border-color: var(--ink-soft);
 }
-details.defer[open] summary {
+details.defer[open] summary,
+details.project-move[open] summary {
   color: var(--accent);
   border-color: var(--accent);
 }
-.defer-menu {
+.defer-menu,
+.project-move-menu {
   position: absolute;
   right: 0;
   top: calc(100% + 6px);
@@ -711,7 +822,8 @@ details.defer[open] summary {
   gap: 2px;
   min-width: 130px;
 }
-.defer-menu button {
+.defer-menu button,
+.project-move-menu button {
   background: none;
   border: none;
   text-align: left;
@@ -720,8 +832,16 @@ details.defer[open] summary {
   font-size: var(--fs-sm);
   cursor: pointer;
 }
-.defer-menu button:hover {
+.defer-menu button:hover,
+.project-move-menu button:hover {
   background: var(--surface-2);
+}
+.project-move-empty {
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+  font-style: italic;
+  padding: 6px 10px;
+  white-space: nowrap;
 }
 
 .horizon-dot {
@@ -809,7 +929,7 @@ details.defer[open] summary {
   font-size: var(--fs-xl);
   margin: 8px 0 2px;
 }
-.drawer-program {
+.drawer-area {
   font-size: var(--fs-sm);
   color: var(--ink-soft);
   margin: 0;

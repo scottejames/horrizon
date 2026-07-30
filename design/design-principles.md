@@ -59,3 +59,30 @@ matters more than structured input here. An unrecognized `#code` is still
 accepted and chipped (labeled "project (new)") instead of rejected; the parser
 should never block on a project it doesn't already know about, since a new
 project may legitimately not exist in the sidebar yet.
+
+## Programs are "Areas of Responsibility"; grouping is by head space, not org chart
+
+Revisited 2026-07-30, after the first Programs/Projects sidebar shipped and
+turned out to be actively annoying to use — every program rendered its own
+permanently-visible "add project" text box, so the sidebar was mostly empty
+input fields. Renamed the concept from "Program" (a vague, faintly corporate
+word for a grouping) to **Area of Responsibility** — a standing area of your
+life or work (Home, Health, Work, Finances…) you group projects under by
+which head space they belong to, not by any formal hierarchy. This is a
+naming and grouping-criterion change, not just a label swap: it changes what
+question you ask when deciding where a project belongs ("what head space is
+this?" rather than "what program owns this?").
+
+## Areas/Projects are a tree; capture and organize are separate steps
+
+The sidebar is a collapsible tree — Areas of Responsibility as expandable
+nodes, Projects nested under them, plus an always-present "Unassigned"
+bucket — rather than a flat list with one add-form wired to each area. There
+is exactly one "+" control for a new area and one for a new project, both
+hidden until clicked; a newly-created project always lands in Unassigned.
+Organizing it into an area is a deliberate second step (drag the row onto an
+area, or use its "Move ▾" menu), the same capture-now/organize-later split
+the app already uses for tasks (quick-add now, triage into a horizon later).
+Drag-and-drop is the fluid path; the "Move ▾" dropdown is the accessible
+equivalent and the only path on touch/keyboard — don't let the drag
+interaction become the sole way to reassign a project.

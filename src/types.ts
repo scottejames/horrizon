@@ -16,10 +16,10 @@ export interface Project {
   id: string;
   shortCode: string;
   name: string;
-  programId?: string;
+  areaId?: string;
 }
 
-export interface Program {
+export interface AreaOfResponsibility {
   id: string;
   name: string;
 }
