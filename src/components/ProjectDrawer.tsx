@@ -31,7 +31,14 @@ export function ProjectDrawer({ projectId, onClose }: ProjectDrawerProps) {
 
   const area = project?.areaId ? areas.find((item) => item.id === project.areaId) : undefined;
   const linkedTasks = projectId ? tasksByProject(projectId) : [];
-  const moveTargets = areas.filter((candidate) => candidate.id !== project?.areaId);
+  // Only offer areas that share the project's own commitment — an area is
+  // never a valid move target across personal/work, since that's exactly
+  // the inconsistency (a work project pointing at a personal area) that
+  // dragging within the sidebar tree can't produce either, because the
+  // tree only ever shows one commitment's areas and projects at a time.
+  const moveTargets = areas.filter(
+    (candidate) => candidate.id !== project?.areaId && candidate.commitment === project?.commitment,
+  );
 
   function handleMove(areaId: string | undefined) {
     if (project) moveProjectToArea(project.id, areaId);

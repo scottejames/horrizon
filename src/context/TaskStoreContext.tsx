@@ -1,18 +1,19 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { client } from "../lib/dataClient";
-import { toHorizon, toPriority, toTaskState } from "../lib/guards";
-import type { Horizon, Priority, Task } from "../types";
+import { toCommitment, toHorizon, toPriority, toTaskState } from "../lib/guards";
+import type { Commitment, Horizon, Priority, Task } from "../types";
 
 export interface AddTaskInput {
   description: string;
   priority: Priority;
   horizon: Horizon;
+  commitment: Commitment;
   projectId?: string;
 }
 
 interface TaskStoreValue {
   tasks: Task[];
-  tasksByHorizon: (horizon: Horizon) => Task[];
+  tasksByHorizon: (horizon: Horizon, commitment: Commitment) => Task[];
   tasksByProject: (projectId: string) => Task[];
   addTask: (input: AddTaskInput) => void;
   toggleDone: (id: string) => void;
@@ -47,6 +48,7 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
             priority: toPriority(item.priority),
             horizon: toHorizon(item.horizon),
             state: toTaskState(item.state),
+            commitment: toCommitment(item.commitment),
             deferredFrom: item.deferredFrom ? toHorizon(item.deferredFrom) : undefined,
             projectId: item.projectId ?? undefined,
           })),
@@ -55,9 +57,9 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
     return () => sub.unsubscribe();
   }, []);
 
-  function tasksByHorizon(horizon: Horizon): Task[] {
+  function tasksByHorizon(horizon: Horizon, commitment: Commitment): Task[] {
     return tasks
-      .filter((task) => task.horizon === horizon)
+      .filter((task) => task.horizon === horizon && task.commitment === commitment)
       .slice()
       .sort((a, b) => {
         const stateDiff = stateRank(a.state) - stateRank(b.state);
@@ -80,6 +82,7 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
       priority: input.priority,
       horizon: input.horizon,
       state: "open",
+      commitment: input.commitment,
       projectId: input.projectId,
     }).catch(console.error);
   }

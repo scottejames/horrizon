@@ -2,12 +2,13 @@ import { describe, expect, it } from "vitest";
 import { parseQuickAdd } from "./parseQuickAdd";
 
 describe("parseQuickAdd", () => {
-  it("defaults to today with no priority or project for plain text", () => {
+  it("defaults to today with no priority, project, or commitment for plain text", () => {
     expect(parseQuickAdd("Buy stamps")).toEqual({
       description: "Buy stamps",
       priority: null,
       project: null,
       horizon: "today",
+      commitment: null,
     });
   });
 
@@ -38,17 +39,23 @@ describe("parseQuickAdd", () => {
     expect(parseQuickAdd("Task someday")).toMatchObject({ horizon: "someday" });
   });
 
-  it("parses priority, project, and schedule together regardless of order", () => {
-    expect(parseQuickAdd("Call tile supplier !high #KIT tomorrow")).toEqual({
+  it("recognizes both commitment keywords", () => {
+    expect(parseQuickAdd("Task @work")).toMatchObject({ commitment: "work" });
+    expect(parseQuickAdd("Task @personal")).toMatchObject({ commitment: "personal" });
+  });
+
+  it("parses priority, project, schedule, and commitment together regardless of order", () => {
+    expect(parseQuickAdd("Call tile supplier !high #KIT tomorrow @work")).toEqual({
       description: "Call tile supplier",
       priority: "high",
       project: "KIT",
       horizon: "tomorrow",
+      commitment: "work",
     });
   });
 
   it("collapses extra whitespace left behind after removing tokens", () => {
-    expect(parseQuickAdd("  Fix   the   sink   !low   #HOM   ")).toMatchObject({
+    expect(parseQuickAdd("  Fix   the   sink   !low   #HOM   @personal   ")).toMatchObject({
       description: "Fix the sink",
     });
   });

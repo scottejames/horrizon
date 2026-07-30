@@ -27,12 +27,21 @@ vi.mock("../lib/dataClient", () => ({
 
 function TestHarness() {
   const { tasksByHorizon, addTask, moveTask } = useTaskStore();
-  const today = tasksByHorizon("today");
-  const tomorrow = tasksByHorizon("tomorrow");
+  const today = tasksByHorizon("today", "personal");
+  const tomorrow = tasksByHorizon("tomorrow", "personal");
 
   return (
     <div>
-      <button onClick={() => addTask({ description: "Buy stamps", priority: "med", horizon: "today" })}>
+      <button
+        onClick={() =>
+          addTask({
+            description: "Buy stamps",
+            priority: "med",
+            horizon: "today",
+            commitment: "personal",
+          })
+        }
+      >
         add task
       </button>
       <ul aria-label="today">
@@ -83,7 +92,60 @@ describe("TaskStoreContext", () => {
 
     expect(await screen.findByText("Buy stamps")).toBeInTheDocument();
     expect(createMock).toHaveBeenCalledWith(
-      expect.objectContaining({ description: "Buy stamps", horizon: "today", state: "open" }),
+      expect.objectContaining({
+        description: "Buy stamps",
+        horizon: "today",
+        state: "open",
+        commitment: "personal",
+      }),
+    );
+  });
+
+  it("keeps a work task out of the personal view", async () => {
+    function MixedHarness() {
+      const { tasksByHorizon, addTask } = useTaskStore();
+      const personal = tasksByHorizon("today", "personal");
+      const work = tasksByHorizon("today", "work");
+      return (
+        <div>
+          <button
+            onClick={() =>
+              addTask({
+                description: "Ship the report",
+                priority: "med",
+                horizon: "today",
+                commitment: "work",
+              })
+            }
+          >
+            add work task
+          </button>
+          <ul aria-label="personal-today">
+            {personal.map((task) => (
+              <li key={task.id}>{task.description}</li>
+            ))}
+          </ul>
+          <ul aria-label="work-today">
+            {work.map((task) => (
+              <li key={task.id}>{task.description}</li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+
+    const user = userEvent.setup();
+    render(
+      <TaskStoreProvider>
+        <MixedHarness />
+      </TaskStoreProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "add work task" }));
+
+    expect(await screen.findByText("Ship the report")).toBeInTheDocument();
+    expect(screen.getByRole("list", { name: "personal-today" })).not.toHaveTextContent(
+      "Ship the report",
     );
   });
 

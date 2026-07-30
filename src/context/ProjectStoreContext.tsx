@@ -1,13 +1,14 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { client } from "../lib/dataClient";
+import { toCommitment } from "../lib/guards";
 import { generateShortCode } from "../lib/shortCode";
-import type { AreaOfResponsibility, Project } from "../types";
+import type { AreaOfResponsibility, Commitment, Project } from "../types";
 
 interface ProjectStoreValue {
   areas: AreaOfResponsibility[];
   projects: Project[];
-  addArea: (name: string) => void;
-  addProject: (name: string, areaId?: string) => Project;
+  addArea: (name: string, commitment: Commitment) => void;
+  addProject: (name: string, commitment: Commitment, areaId?: string) => Project;
   projectByCode: (code: string) => Project | undefined;
   /** Reassigns a project to a different area, or to `undefined` for unassigned. */
   moveProjectToArea: (projectId: string, areaId: string | undefined) => void;
@@ -27,7 +28,14 @@ export function ProjectStoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const sub = client.models.AreaOfResponsibility.observeQuery().subscribe({
-      next: ({ items }) => setAreas(items.map((item) => ({ id: item.id, name: item.name }))),
+      next: ({ items }) =>
+        setAreas(
+          items.map((item) => ({
+            id: item.id,
+            name: item.name,
+            commitment: toCommitment(item.commitment),
+          })),
+        ),
     });
     return () => sub.unsubscribe();
   }, []);
@@ -40,6 +48,7 @@ export function ProjectStoreProvider({ children }: { children: ReactNode }) {
             id: item.id,
             shortCode: item.shortCode,
             name: item.name,
+            commitment: toCommitment(item.commitment),
             areaId: item.areaId ?? undefined,
           })),
         ),
@@ -47,21 +56,21 @@ export function ProjectStoreProvider({ children }: { children: ReactNode }) {
     return () => sub.unsubscribe();
   }, []);
 
-  function addArea(name: string) {
+  function addArea(name: string, commitment: Commitment) {
     const id = crypto.randomUUID();
-    setAreas((prev) => [...prev, { id, name }]);
-    client.models.AreaOfResponsibility.create({ id, name }).catch(console.error);
+    setAreas((prev) => [...prev, { id, name, commitment }]);
+    client.models.AreaOfResponsibility.create({ id, name, commitment }).catch(console.error);
   }
 
-  function addProject(name: string, areaId?: string): Project {
+  function addProject(name: string, commitment: Commitment, areaId?: string): Project {
     const id = crypto.randomUUID();
     const shortCode = generateShortCode(
       name,
       projects.map((project) => project.shortCode),
     );
-    const project: Project = { id, shortCode, name, areaId };
+    const project: Project = { id, shortCode, name, commitment, areaId };
     setProjects((prev) => [...prev, project]);
-    client.models.Project.create({ id, shortCode, name, areaId }).catch(console.error);
+    client.models.Project.create({ id, shortCode, name, commitment, areaId }).catch(console.error);
     return project;
   }
 

@@ -193,6 +193,31 @@ ul {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+.commitment-toggle {
+  display: flex;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+}
+.commitment-option {
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--ink-soft);
+}
+.commitment-option:hover {
+  color: var(--ink);
+}
+.commitment-option.active {
+  background: var(--surface-2);
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
 .sign-out {
   background: none;
   border: 1px solid var(--border-strong);
@@ -572,6 +597,11 @@ ul {
   background: var(--surface-2);
   border-color: var(--border-strong);
   font-weight: 700;
+}
+.parse-chip.pc-commitment {
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--ink-soft);
 }
 .parse-chip.pc-today {
   background: var(--accent-wash);

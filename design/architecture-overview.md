@@ -26,11 +26,18 @@ account was enough for V0.
 `amplify/data/resource.ts` defines three models — `Task`, `Project`,
 `AreaOfResponsibility` — each backed by its own DynamoDB table via AppSync,
 each with its own explicit `allow.owner()` authorization rule
-(deny-by-default; see `CODING_GUIDELINES.md` #5). `priority`, `horizon`, and
-`state` are plain strings rather than GraphQL enums, and `Task.projectId` /
-`Project.areaId` are plain optional string fields rather than
-`belongsTo`/`hasMany` relations — both per the same section of the coding
-guidelines, and both already covered there with this exact schema in mind.
+(deny-by-default; see `CODING_GUIDELINES.md` #5). `priority`, `horizon`,
+`state`, and `commitment` are plain strings rather than GraphQL enums, and
+`Task.projectId` / `Project.areaId` are plain optional string fields rather
+than `belongsTo`/`hasMany` relations — both per the same section of the
+coding guidelines, and both already covered there with this exact schema in
+mind.
+
+`commitment` (`'personal' | 'work'`) was added 2026-07-30 to all three
+models independently — not inherited down the hierarchy — backing the
+header's Personal/Work toggle. See `design-principles.md`'s "Personal/Work
+is a second, independent filter" entry for why it's independent rather than
+derived, and how the frontend still defaults it sensibly at creation time.
 
 `AreaOfResponsibility` was renamed from `Program` on 2026-07-30 (see
 `design-principles.md`'s "Programs are Areas of Responsibility" entry) — a

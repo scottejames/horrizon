@@ -98,3 +98,34 @@ drag handle, code, name, and open-task count — drag-and-drop is the only
 in-tree move affordance; the drawer is the only place to reassign it without
 dragging. If a future change adds a row-level control back, budget its width
 against the name column first, not after.
+
+## Personal/Work is a second, independent filter — not a new color
+
+Added 2026-07-30. Every Task, Project, and AreaOfResponsibility carries its
+own `commitment: 'personal' | 'work'` field, and a header toggle switches
+which one the whole app (sidebar tree, horizon tabs and lists, counts, quick-
+add defaults) is currently showing. A few decisions worth keeping intact:
+
+- **Independent, not inherited.** A Task's commitment isn't derived from its
+  Project, nor a Project's from its Area — each is its own field. This
+  mirrors how the user asked for it ("each area, project, task should be
+  linked to ONE of personal or work"), and keeps the data model simple
+  (no cascading recompute when a project moves areas). The cost is that
+  it's *possible* to create an inconsistent tree (a work project sitting in
+  a personal area) — see the mitigation below.
+- **Defaults resolve, so it's rarely typed by hand.** Quick-add resolves a
+  task's commitment in this order: an explicit `@work`/`@personal` in the
+  text, then the commitment of whatever `#project` it's linked to, then
+  whichever tab is currently active. New Areas/Projects created from the
+  sidebar's "+" controls default to the active tab. Typing `@work`/`@personal`
+  is the escape hatch for the exception, not the common path.
+- **The toggle is neutral.** Two buttons, ink/border tones only — see "Color
+  is spent on time-horizon only" above. This is a second filter dimension,
+  not a third color family; don't give Personal/Work their own hue.
+- **The drawer's "Move to area" only offers same-commitment areas.** Since
+  the sidebar tree only ever shows one commitment's areas and projects at
+  once, dragging can't create a cross-commitment area/project mismatch —
+  but the drawer's move menu is a separate code path (not filtered by the
+  active tab), so it filters explicitly by `project.commitment` to close the
+  same loophole there. If another way to reassign a project's area gets
+  added later, it needs the same guard.

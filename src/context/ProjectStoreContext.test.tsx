@@ -43,8 +43,8 @@ function TestHarness() {
 
   return (
     <div>
-      <button onClick={() => addArea("Home")}>add area</button>
-      <button onClick={() => addProject("Kitchen Remodel")}>add project</button>
+      <button onClick={() => addArea("Home", "personal")}>add area</button>
+      <button onClick={() => addProject("Kitchen Remodel", "personal")}>add project</button>
       <ul aria-label="unassigned">
         {unassigned.map((project) => (
           <li key={project.id}>
@@ -93,11 +93,13 @@ describe("ProjectStoreContext", () => {
     expect(await screen.findByText("Kitchen Remodel")).toBeInTheDocument();
     expect(screen.getByRole("list", { name: "unassigned" })).toHaveTextContent("Kitchen Remodel");
     expect(projectCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ name: "Kitchen Remodel", areaId: undefined }),
+      expect.objectContaining({ name: "Kitchen Remodel", commitment: "personal", areaId: undefined }),
     );
 
     await user.click(screen.getByRole("button", { name: "add area" }));
-    expect(areaCreateMock).toHaveBeenCalledWith(expect.objectContaining({ name: "Home" }));
+    expect(areaCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Home", commitment: "personal" }),
+    );
   });
 
   it("moves a project into an area on demand", async () => {

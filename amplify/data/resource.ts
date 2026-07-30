@@ -3,10 +3,16 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 /**
  * Task/Project/AreaOfResponsibility schema, backed by DynamoDB via AppSync.
  *
- * `priority`, `horizon`, and `state` are plain strings rather than GraphQL
- * enums: their accepted values are expected to evolve (see
+ * `priority`, `horizon`, `state`, and `commitment` are plain strings rather
+ * than GraphQL enums: their accepted values are expected to evolve (see
  * CODING_GUIDELINES.md #5), and an enum member can't be renamed without a
  * breaking schema change.
+ *
+ * `commitment` ('personal' | 'work') is set independently on every Task,
+ * Project, and AreaOfResponsibility rather than only on Area and inherited
+ * — see design/design-principles.md's "Personal/Work is a second,
+ * independent filter" entry for why, and how the app still defaults it
+ * sensibly at creation time so this rarely needs to be typed by hand.
  *
  * `Task.projectId` / `Project.areaId` are plain optional string fields, not
  * `belongsTo`/`hasMany` relations — detaching a project from an area, or a
@@ -21,6 +27,7 @@ const schema = a.schema({
       priority: a.string().required(), // 'high' | 'med' | 'low'
       horizon: a.string().required(), // 'today' | 'tomorrow' | 'week' | 'someday'
       state: a.string().required(), // 'open' | 'done' | 'deferred'
+      commitment: a.string().required(), // 'personal' | 'work'
       deferredFrom: a.string(), // horizon this task was deferred from, set only while state === 'deferred'
       projectId: a.string(),
     })
@@ -30,6 +37,7 @@ const schema = a.schema({
     .model({
       shortCode: a.string().required(),
       name: a.string().required(),
+      commitment: a.string().required(), // 'personal' | 'work'
       areaId: a.string(),
     })
     .authorization((allow) => [allow.owner()]),
@@ -37,6 +45,7 @@ const schema = a.schema({
   AreaOfResponsibility: a
     .model({
       name: a.string().required(),
+      commitment: a.string().required(), // 'personal' | 'work'
     })
     .authorization((allow) => [allow.owner()]),
 });

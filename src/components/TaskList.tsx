@@ -1,19 +1,20 @@
 import { useProjectStore } from "../context/ProjectStoreContext";
 import { useTaskStore } from "../context/TaskStoreContext";
 import { HORIZON_INTRO } from "../lib/horizon";
-import type { Horizon, Task } from "../types";
+import type { Commitment, Horizon, Task } from "../types";
 import { TaskRow } from "./TaskRow";
 
 interface TaskListProps {
   horizon: Horizon;
+  commitment: Commitment;
   onOpenProject: (projectId: string) => void;
   onMoved: (target: Horizon, wasSomeday: boolean) => void;
 }
 
-export function TaskList({ horizon, onOpenProject, onMoved }: TaskListProps) {
+export function TaskList({ horizon, commitment, onOpenProject, onMoved }: TaskListProps) {
   const { tasksByHorizon, toggleDone, moveTask } = useTaskStore();
   const { projects } = useProjectStore();
-  const tasks = tasksByHorizon(horizon);
+  const tasks = tasksByHorizon(horizon, commitment);
 
   function handleMove(task: Task, target: Horizon) {
     const wasSomeday = task.horizon === "someday";

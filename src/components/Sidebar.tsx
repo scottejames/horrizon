@@ -1,26 +1,33 @@
 import { useState } from "react";
 import { useProjectStore } from "../context/ProjectStoreContext";
 import { useTaskStore } from "../context/TaskStoreContext";
+import type { Commitment } from "../types";
 import { AreaSection } from "./AreaSection";
 import { InlineAddForm } from "./InlineAddForm";
 
 interface SidebarProps {
+  activeCommitment: Commitment;
   onOpenProject: (projectId: string) => void;
   onOpenSomeday: () => void;
 }
 
-export function Sidebar({ onOpenProject, onOpenSomeday }: SidebarProps) {
+export function Sidebar({ activeCommitment, onOpenProject, onOpenSomeday }: SidebarProps) {
   const { areas, projects, addArea, addProject, moveProjectToArea } = useProjectStore();
   const { tasks } = useTaskStore();
   const [addingArea, setAddingArea] = useState(false);
   const [addingProject, setAddingProject] = useState(false);
 
+  const visibleAreas = areas.filter((area) => area.commitment === activeCommitment);
+  const visibleProjects = projects.filter((project) => project.commitment === activeCommitment);
+
   function openTaskCount(projectId: string): number {
     return tasks.filter((task) => task.projectId === projectId && task.state !== "done").length;
   }
 
-  const somedayCount = tasks.filter((task) => task.horizon === "someday").length;
-  const unassignedProjects = projects.filter((project) => !project.areaId);
+  const somedayCount = tasks.filter(
+    (task) => task.horizon === "someday" && task.commitment === activeCommitment,
+  ).length;
+  const unassignedProjects = visibleProjects.filter((project) => !project.areaId);
 
   return (
     <aside className="sidebar">
@@ -40,25 +47,25 @@ export function Sidebar({ onOpenProject, onOpenSomeday }: SidebarProps) {
         <InlineAddForm
           placeholder="e.g. Home, Health, Work"
           onSubmit={(name) => {
-            addArea(name);
+            addArea(name, activeCommitment);
             setAddingArea(false);
           }}
         />
       )}
 
-      {areas.length === 0 && projects.length === 0 && (
+      {visibleAreas.length === 0 && visibleProjects.length === 0 && (
         <p className="sidebar-empty">
-          Nothing set up yet — group projects by the head space they belong to (Home, Health,
-          Work…) and drag projects between them.
+          Nothing {activeCommitment} set up yet — group projects by the head space they belong to
+          (Home, Health, Work…) and drag projects between them.
         </p>
       )}
 
-      {areas.map((area) => (
+      {visibleAreas.map((area) => (
         <AreaSection
           key={area.id}
           areaId={area.id}
           title={area.name}
-          projects={projects.filter((project) => project.areaId === area.id)}
+          projects={visibleProjects.filter((project) => project.areaId === area.id)}
           openTaskCount={openTaskCount}
           onOpenProject={onOpenProject}
           onMoveProject={moveProjectToArea}
@@ -79,7 +86,7 @@ export function Sidebar({ onOpenProject, onOpenSomeday }: SidebarProps) {
           placeholder="New project"
           buttonLabel="Add"
           onSubmit={(name) => {
-            addProject(name);
+            addProject(name, activeCommitment);
             setAddingProject(false);
           }}
         />

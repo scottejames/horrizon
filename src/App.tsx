@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { CaptureBar } from "./components/CaptureBar";
+import { CommitmentToggle } from "./components/CommitmentToggle";
 import { HorizonTabs } from "./components/HorizonTabs";
 import { Logo } from "./components/Logo";
 import { ProjectDrawer } from "./components/ProjectDrawer";
@@ -9,7 +10,7 @@ import { Toast } from "./components/Toast";
 import { useTaskStore } from "./context/TaskStoreContext";
 import { useAuth } from "./hooks/useAuth";
 import { HORIZON_LABEL, HORIZON_ORDER } from "./lib/horizon";
-import type { Horizon } from "./types";
+import type { Commitment, Horizon } from "./types";
 
 const TODAY_LABEL = new Date().toLocaleDateString(undefined, {
   weekday: "long",
@@ -20,6 +21,7 @@ const TODAY_LABEL = new Date().toLocaleDateString(undefined, {
 
 export default function App() {
   const [activeHorizon, setActiveHorizon] = useState<Horizon>("today");
+  const [activeCommitment, setActiveCommitment] = useState<Commitment>("personal");
   const [openProjectId, setOpenProjectId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const { tasks } = useTaskStore();
@@ -27,7 +29,10 @@ export default function App() {
 
   const counts = HORIZON_ORDER.reduce(
     (acc, horizon) => {
-      acc[horizon] = tasks.filter((task) => task.horizon === horizon && task.state !== "done").length;
+      acc[horizon] = tasks.filter(
+        (task) =>
+          task.horizon === horizon && task.state !== "done" && task.commitment === activeCommitment,
+      ).length;
       return acc;
     },
     {} as Record<Horizon, number>,
@@ -51,6 +56,7 @@ export default function App() {
           <span className="brand-tag">today's list, tomorrow's plan</span>
         </div>
         <div className="appbar-right">
+          <CommitmentToggle value={activeCommitment} onChange={setActiveCommitment} />
           <time className="today-date">{TODAY_LABEL}</time>
           <button type="button" className="sign-out" onClick={signOut}>
             Sign out
@@ -60,13 +66,19 @@ export default function App() {
 
       <div className="shell">
         <Sidebar
+          activeCommitment={activeCommitment}
           onOpenProject={setOpenProjectId}
           onOpenSomeday={() => setActiveHorizon("someday")}
         />
         <main>
-          <CaptureBar onAdded={handleAdded} />
+          <CaptureBar activeCommitment={activeCommitment} onAdded={handleAdded} />
           <HorizonTabs active={activeHorizon} counts={counts} onChange={setActiveHorizon} />
-          <TaskList horizon={activeHorizon} onOpenProject={setOpenProjectId} onMoved={handleMoved} />
+          <TaskList
+            horizon={activeHorizon}
+            commitment={activeCommitment}
+            onOpenProject={setOpenProjectId}
+            onMoved={handleMoved}
+          />
         </main>
       </div>
 
