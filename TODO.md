@@ -1,0 +1,87 @@
+# TODO
+
+Backlog for Horizon. `Up next` and `Later` are product/UX; `Infrastructure`
+is technical debt or platform limitations. When something ships, move it
+into `Shipped` (checked) rather than deleting the line — see
+`.claude/skills/update-project-artifacts/SKILL.md`.
+
+## Up next
+
+Raised reviewing a real screenshot of the Areas of Responsibility tree
+(2026-07-30):
+
+- [ ] **Rename** an Area, Project, or Task — there is no rename UI anywhere
+      in the app yet. Worth prioritizing: "Home - Finance" / "Home -
+      Housework" already shows a user hand-rolling a hierarchy into the
+      *name* because there's no real sub-structure — see the nested
+      sub-areas idea below before just adding a rename box.
+- [ ] **Delete** an Area, Project, or Task — also missing everywhere. A
+      Task can only be marked Done, never removed.
+- [ ] Confirm the sidebar heading ("Areas of Responsibility") no longer
+      wraps to two lines now that the column widened 230px → 270px
+      (`713c2b9`) — wasn't re-checked with a fresh screenshot.
+- [ ] Persist each Area's collapsed/expanded state across sessions —
+      currently everything re-expands on every reload.
+
+## Later — features worth considering (researched 2026-07-30)
+
+Surveyed Things 3, OmniFocus, Todoist, TickTick, Amazing Marvin, and
+Sunsama/Motion/Morgen (time-blocking tools). None of these are committed —
+just candidates to weigh against Horizon's own design principles before
+building.
+
+- [ ] **Nested sub-areas** (Area → Sub-area → Project). Things 3 puts
+      "Areas of Responsibility" at the top of its hierarchy the same way we
+      now do — but if we want "Home - Finance" style grouping to be real
+      structure instead of a naming hack, this is the fix.
+- [ ] **Scheduled review cadence per Area/Project.** OmniFocus's standout
+      GTD feature: you set a review interval (weekly, every 3 months...)
+      and it surfaces due-for-review items in a dedicated view, instead of
+      you having to remember. This is a natural extension of the Someday
+      review we already have — could extend "review" to Areas/Projects
+      generally, not just Someday tasks.
+- [ ] **Natural-language date/time parsing** in quick-add — Todoist parses
+      "tomorrow at 3pm" or "every Monday" directly out of free text. Ours
+      currently only recognizes the four fixed horizon keywords; this would
+      be a real upgrade to the same parser, not a new feature.
+- [ ] **Recurring tasks** (daily/weekly/custom repeat rules) — TickTick and
+      Todoist both have this; Horizon currently has no concept of a task
+      that comes back. Directly relevant to a "things I want todo TODAY"
+      app that will otherwise re-type the same task every day.
+- [ ] **Tags/contexts, cross-cutting Project/Area** — classic GTD
+      "contexts" (@calls, @errands) that TickTick and Amazing Marvin
+      support as a second, independent dimension alongside Project — e.g.
+      "everything I can do on the phone," regardless of which project or
+      area it belongs to.
+- [ ] **Subtasks/checklists within a task** — Todoist and TickTick both
+      support this; useful once a Today task is bigger than one line item.
+- [ ] **Kanban/board view per project** — of the GTD-focused apps, only
+      Todoist has this; an alternative way to view one project's tasks
+      instead of only via the horizon-tabbed list.
+- [ ] **"Waiting For" list** — a standard GTD list type for tasks blocked
+      on someone else, distinct from Someday (which is "no date yet," not
+      "blocked on a person").
+- [ ] **Saved filters / custom views** — OmniFocus's "Perspectives": e.g.
+      "everything high-priority regardless of horizon," or "everything in
+      one Area regardless of horizon" — cuts across the existing
+      horizon-tab and area-tree navigation.
+- [ ] **Start-of-day review ritual for carried-over tasks** — Sunsama's
+      pattern: each day opens with a deliberate pass over yesterday's
+      unfinished Today items, asking you to explicitly reschedule/defer
+      each one rather than letting them silently roll forward.
+- [ ] **Habit tracker** — TickTick's recurring daily check-off items,
+      distinct from one-off tasks (a streak, not a to-do).
+
+## Infrastructure
+
+- [ ] Drag-and-drop project reassignment doesn't work on touch devices
+      (plain HTML5 DnD has no touch backend) — the project drawer's "Move
+      to area" control is the only touch-compatible path today. Matters if
+      Horizon is ever used on a phone/tablet.
+- [ ] Production JS bundle is ~910KB (mostly `aws-amplify` +
+      `@aws-amplify/ui-react`) — Vite already flags this. Not a problem
+      yet; revisit with code-splitting if load time becomes noticeable.
+
+## Shipped
+
+(nothing logged retroactively — starting from here forward)
