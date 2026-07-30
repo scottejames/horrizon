@@ -312,8 +312,15 @@ ul {
 .tree-area-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 2px;
   width: 100%;
+}
+.tree-area-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
   text-align: left;
   background: none;
   border: none;
@@ -324,11 +331,59 @@ ul {
   font-weight: 600;
   font-size: var(--fs-sm);
 }
-.tree-area-header:hover {
+.tree-area-toggle:hover {
   background: var(--surface-2);
 }
-.tree-area-header .project-count {
+.tree-area-toggle .project-count {
   margin-left: auto;
+}
+.tree-area-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tree-area-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+}
+.tree-area-input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 3px 6px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.rename-btn {
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: var(--fs-sm);
+  line-height: 1;
+  padding: 3px 5px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.rename-btn:hover {
+  color: var(--accent);
+  background: var(--surface-2);
+}
+.tree-area-header .rename-btn {
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.tree-area:hover .tree-area-header .rename-btn,
+.tree-area:focus-within .tree-area-header .rename-btn {
+  opacity: 1;
 }
 .disclosure {
   display: inline-block;
@@ -778,6 +833,17 @@ ul {
   text-decoration: line-through;
   color: var(--ink-soft);
 }
+.task-desc-input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 3px 6px;
+  background: var(--paper);
+  color: var(--ink);
+}
 
 .deferred-tag {
   font-size: var(--fs-xxs);
@@ -959,7 +1025,24 @@ details.project-move[open] summary {
 .drawer-header h2 {
   font-family: var(--font-display);
   font-size: var(--fs-xl);
+  margin: 0;
+}
+.drawer-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   margin: 8px 0 2px;
+}
+.drawer-title-input {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin: 8px 0 2px;
+  background: var(--surface);
+  color: var(--ink);
+  width: 100%;
 }
 details.drawer-move {
   display: inline-block;

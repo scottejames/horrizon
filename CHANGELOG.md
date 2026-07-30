@@ -36,6 +36,14 @@ kept current.
 - `design/design-principles.md` and `design/architecture-overview.md`,
   recording the UI and infrastructure decisions made this session as they
   were made, rather than leaving them to live only in conversation.
+- Inline rename for any Task, Project, or Area: a pencil icon turns the
+  label into a text box; Enter or clicking away saves, Escape reverts. All
+  three share one hook (`useInlineRename`) rather than three copies of the
+  same edit/commit/cancel logic. Placement follows available space — always
+  visible on task rows and the project drawer, hover-revealed on the
+  narrower sidebar area header, absent on the synthetic "Unassigned"
+  bucket.
+- `CHANGELOG.md` itself.
 
 ### Changed
 

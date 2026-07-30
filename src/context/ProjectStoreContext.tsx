@@ -12,6 +12,8 @@ interface ProjectStoreValue {
   projectByCode: (code: string) => Project | undefined;
   /** Reassigns a project to a different area, or to `undefined` for unassigned. */
   moveProjectToArea: (projectId: string, areaId: string | undefined) => void;
+  renameProject: (id: string, name: string) => void;
+  renameArea: (id: string, name: string) => void;
 }
 
 const ProjectStoreContext = createContext<ProjectStoreValue | null>(null);
@@ -85,9 +87,28 @@ export function ProjectStoreProvider({ children }: { children: ReactNode }) {
     client.models.Project.update({ id: projectId, areaId: areaId ?? null }).catch(console.error);
   }
 
+  function renameProject(id: string, name: string) {
+    setProjects((prev) => prev.map((project) => (project.id === id ? { ...project, name } : project)));
+    client.models.Project.update({ id, name }).catch(console.error);
+  }
+
+  function renameArea(id: string, name: string) {
+    setAreas((prev) => prev.map((area) => (area.id === id ? { ...area, name } : area)));
+    client.models.AreaOfResponsibility.update({ id, name }).catch(console.error);
+  }
+
   return (
     <ProjectStoreContext.Provider
-      value={{ areas, projects, addArea, addProject, projectByCode, moveProjectToArea }}
+      value={{
+        areas,
+        projects,
+        addArea,
+        addProject,
+        projectByCode,
+        moveProjectToArea,
+        renameProject,
+        renameArea,
+      }}
     >
       {children}
     </ProjectStoreContext.Provider>

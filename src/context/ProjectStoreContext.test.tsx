@@ -3,8 +3,9 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ProjectStoreProvider, useProjectStore } from "./ProjectStoreContext";
 
-const { areaCreateMock, projectCreateMock, projectUpdateMock } = vi.hoisted(() => ({
+const { areaCreateMock, areaUpdateMock, projectCreateMock, projectUpdateMock } = vi.hoisted(() => ({
   areaCreateMock: vi.fn().mockResolvedValue({}),
+  areaUpdateMock: vi.fn().mockResolvedValue({}),
   projectCreateMock: vi.fn().mockResolvedValue({}),
   projectUpdateMock: vi.fn().mockResolvedValue({}),
 }));
@@ -20,6 +21,7 @@ vi.mock("../lib/dataClient", () => ({
           },
         }),
         create: areaCreateMock,
+        update: areaUpdateMock,
       },
       Project: {
         observeQuery: () => ({
@@ -36,7 +38,8 @@ vi.mock("../lib/dataClient", () => ({
 }));
 
 function TestHarness() {
-  const { areas, projects, addArea, addProject, moveProjectToArea } = useProjectStore();
+  const { areas, projects, addArea, addProject, moveProjectToArea, renameProject, renameArea } =
+    useProjectStore();
   const home = areas.find((area) => area.name === "Home");
   const unassigned = projects.filter((project) => !project.areaId);
   const inHome = home ? projects.filter((project) => project.areaId === home.id) : [];
@@ -45,6 +48,10 @@ function TestHarness() {
     <div>
       <button onClick={() => addArea("Home", "personal")}>add area</button>
       <button onClick={() => addProject("Kitchen Remodel", "personal")}>add project</button>
+      {home && (
+        <button onClick={() => renameArea(home.id, "Household")}>rename area</button>
+      )}
+      <ul aria-label="areas">{areas.map((area) => <li key={area.id}>{area.name}</li>)}</ul>
       <ul aria-label="unassigned">
         {unassigned.map((project) => (
           <li key={project.id}>
@@ -54,6 +61,9 @@ function TestHarness() {
                 move {project.id} to Home
               </button>
             )}
+            <button onClick={() => renameProject(project.id, "Kitchen Remodel Phase 2")}>
+              rename {project.id}
+            </button>
           </li>
         ))}
       </ul>
@@ -69,6 +79,7 @@ function TestHarness() {
 describe("ProjectStoreContext", () => {
   beforeEach(() => {
     areaCreateMock.mockClear();
+    areaUpdateMock.mockClear();
     projectCreateMock.mockClear();
     projectUpdateMock.mockClear();
   });
@@ -123,5 +134,39 @@ describe("ProjectStoreContext", () => {
     expect(projectUpdateMock).toHaveBeenCalledWith(
       expect.objectContaining({ areaId: expect.any(String) }),
     );
+  });
+
+  it("renames a project optimistically and fires the network write", async () => {
+    const user = userEvent.setup();
+    render(
+      <ProjectStoreProvider>
+        <TestHarness />
+      </ProjectStoreProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "add project" }));
+    const renameButton = await screen.findByRole("button", { name: /^rename / });
+    await user.click(renameButton);
+
+    expect(await screen.findByText("Kitchen Remodel Phase 2")).toBeInTheDocument();
+    expect(projectUpdateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Kitchen Remodel Phase 2" }),
+    );
+  });
+
+  it("renames an area optimistically and fires the network write", async () => {
+    const user = userEvent.setup();
+    render(
+      <ProjectStoreProvider>
+        <TestHarness />
+      </ProjectStoreProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "add area" }));
+    await user.click(await screen.findByRole("button", { name: "rename area" }));
+
+    expect(await screen.findByText("Household")).toBeInTheDocument();
+    expect(screen.getByRole("list", { name: "areas" })).not.toHaveTextContent("Home");
+    expect(areaUpdateMock).toHaveBeenCalledWith(expect.objectContaining({ name: "Household" }));
   });
 });

@@ -26,7 +26,7 @@ vi.mock("../lib/dataClient", () => ({
 }));
 
 function TestHarness() {
-  const { tasksByHorizon, addTask, moveTask } = useTaskStore();
+  const { tasksByHorizon, addTask, moveTask, updateDescription } = useTaskStore();
   const today = tasksByHorizon("today", "personal");
   const tomorrow = tasksByHorizon("tomorrow", "personal");
 
@@ -49,6 +49,9 @@ function TestHarness() {
           <li key={task.id}>
             {task.description}
             <button onClick={() => moveTask(task.id, "tomorrow")}>defer {task.id}</button>
+            <button onClick={() => updateDescription(task.id, "Buy stamps and envelopes")}>
+              rename {task.id}
+            </button>
           </li>
         ))}
       </ul>
@@ -146,6 +149,25 @@ describe("TaskStoreContext", () => {
     expect(await screen.findByText("Ship the report")).toBeInTheDocument();
     expect(screen.getByRole("list", { name: "personal-today" })).not.toHaveTextContent(
       "Ship the report",
+    );
+  });
+
+  it("renames a task's description optimistically and fires the network write", async () => {
+    const user = userEvent.setup();
+    render(
+      <TaskStoreProvider>
+        <TestHarness />
+      </TaskStoreProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "add task" }));
+    const renameButton = await screen.findByRole("button", { name: /^rename / });
+    await user.click(renameButton);
+
+    expect(await screen.findByText("Buy stamps and envelopes")).toBeInTheDocument();
+    expect(screen.queryByText("Buy stamps")).not.toBeInTheDocument();
+    expect(updateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ description: "Buy stamps and envelopes" }),
     );
   });
 

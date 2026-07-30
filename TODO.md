@@ -10,11 +10,6 @@ into `Shipped` (checked) rather than deleting the line — see
 Raised reviewing a real screenshot of the Areas of Responsibility tree
 (2026-07-30):
 
-- [ ] **Rename** an Area, Project, or Task — there is no rename UI anywhere
-      in the app yet. Worth prioritizing: "Home - Finance" / "Home -
-      Housework" already shows a user hand-rolling a hierarchy into the
-      *name* because there's no real sub-structure — see the nested
-      sub-areas idea below before just adding a rename box.
 - [ ] **Delete** an Area, Project, or Task — also missing everywhere. A
       Task can only be marked Done, never removed.
 - [x] ~~Confirm the sidebar heading no longer wraps~~ — verified with a
@@ -89,3 +84,11 @@ building.
       header (`src/components/Logo.tsx`); a static hex version with a
       `prefers-color-scheme` media query for the browser-tab favicon
       (`public/favicon.svg`), since a favicon can't see the app's own CSS.
+- [x] Personal/Work commitment toggle — filters the whole app; see
+      `design-principles.md`'s "Personal/Work is a second, independent
+      filter" entry.
+- [x] Rename an Area, Project, or Task — pencil icon turns the label into a
+      text box; Enter or clicking away saves, Escape reverts. Doesn't
+      address the underlying "Home - Finance" naming-as-hierarchy workaround
+      (the nested sub-areas idea above still stands) — it only fixes typos
+      and outdated names, not the lack of real sub-structure.

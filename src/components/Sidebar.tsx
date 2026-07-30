@@ -12,7 +12,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeCommitment, onOpenProject, onOpenSomeday }: SidebarProps) {
-  const { areas, projects, addArea, addProject, moveProjectToArea } = useProjectStore();
+  const { areas, projects, addArea, addProject, moveProjectToArea, renameArea } = useProjectStore();
   const { tasks } = useTaskStore();
   const [addingArea, setAddingArea] = useState(false);
   const [addingProject, setAddingProject] = useState(false);
@@ -69,6 +69,7 @@ export function Sidebar({ activeCommitment, onOpenProject, onOpenSomeday }: Side
           openTaskCount={openTaskCount}
           onOpenProject={onOpenProject}
           onMoveProject={moveProjectToArea}
+          onRenameArea={renameArea}
         />
       ))}
 
@@ -79,6 +80,7 @@ export function Sidebar({ activeCommitment, onOpenProject, onOpenSomeday }: Side
         openTaskCount={openTaskCount}
         onOpenProject={onOpenProject}
         onMoveProject={moveProjectToArea}
+        onRenameArea={renameArea}
       />
 
       {addingProject ? (

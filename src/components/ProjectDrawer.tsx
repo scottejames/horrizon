@@ -1,15 +1,61 @@
 import { useEffect, useRef } from "react";
 import { useProjectStore } from "../context/ProjectStoreContext";
 import { useTaskStore } from "../context/TaskStoreContext";
+import { useInlineRename } from "../hooks/useInlineRename";
 import { HORIZON_LABEL } from "../lib/horizon";
+import type { Project } from "../types";
 
 interface ProjectDrawerProps {
   projectId: string | null;
   onClose: () => void;
 }
 
+interface ProjectTitleProps {
+  project: Project;
+  onRename: (name: string) => void;
+}
+
+/**
+ * Split out so it can be remounted (via `key={project.id}` below) whenever
+ * the drawer switches to a different project — otherwise this component's
+ * own rename-editing state would persist across the switch, since the
+ * drawer itself is one long-lived instance reused for whichever project is
+ * open.
+ */
+function ProjectTitle({ project, onRename }: ProjectTitleProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const rename = useInlineRename(project.name, onRename, inputRef);
+
+  if (rename.isEditing) {
+    return (
+      <input
+        ref={inputRef}
+        className="drawer-title-input"
+        value={rename.draft}
+        onChange={(event) => rename.setDraft(event.target.value)}
+        onKeyDown={rename.handleKeyDown}
+        onBlur={rename.commit}
+      />
+    );
+  }
+
+  return (
+    <div className="drawer-title-row">
+      <h2 id="drawerTitle">{project.name}</h2>
+      <button
+        type="button"
+        className="rename-btn"
+        aria-label={`Rename project: ${project.name}`}
+        onClick={rename.startEditing}
+      >
+        ✎
+      </button>
+    </div>
+  );
+}
+
 export function ProjectDrawer({ projectId, onClose }: ProjectDrawerProps) {
-  const { projects, areas, moveProjectToArea } = useProjectStore();
+  const { projects, areas, moveProjectToArea, renameProject } = useProjectStore();
   const { tasksByProject } = useTaskStore();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const moveDetailsRef = useRef<HTMLDetailsElement>(null);
@@ -72,7 +118,11 @@ export function ProjectDrawer({ projectId, onClose }: ProjectDrawerProps) {
           <>
             <div className="drawer-header">
               <span className="drawer-code">#{project.shortCode}</span>
-              <h2 id="drawerTitle">{project.name}</h2>
+              <ProjectTitle
+                key={project.id}
+                project={project}
+                onRename={(name) => renameProject(project.id, name)}
+              />
               <details className="project-move drawer-move" ref={moveDetailsRef}>
                 <summary>{area ? area.name : "No area"} <span aria-hidden="true">▾</span></summary>
                 <div className="project-move-menu">

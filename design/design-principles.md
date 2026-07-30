@@ -129,3 +129,39 @@ add defaults) is currently showing. A few decisions worth keeping intact:
   active tab), so it filters explicitly by `project.commitment` to close the
   same loophole there. If another way to reassign a project's area gets
   added later, it needs the same guard.
+
+## Renaming is inline, pencil-triggered, and width-aware
+
+Added 2026-07-30. Every Task description, Project name, and Area name can
+be renamed the same way: a pencil button turns the label into a text box;
+Enter saves, Escape reverts, and clicking away also saves (not just Enter)
+since losing an edit by clicking elsewhere is a worse default than saving
+one extra time. The three call sites share one hook
+(`useInlineRename`) rather than three copies of the same
+edit/commit/cancel state machine — genuinely the same interaction, not
+just similar-looking code (CODING_GUIDELINES.md's DRY-by-knowledge test).
+
+- **Where the pencil lives depends on available width**, learned the hard
+  way from the sidebar tree row's earlier "Move ▾" truncation bug. Task
+  rows and the project drawer are roomy, so the pencil is always visible.
+  The area header in the sidebar tree is not, so its pencil only appears on
+  row hover/focus (`opacity: 0` by default) rather than competing with the
+  name for space permanently. The synthetic "Unassigned" bucket has no
+  pencil at all — it isn't a real Area row to rename.
+- **The ref never lives inside the hook's returned object.** `eslint-plugin-
+  react-hooks`'s `react-hooks/refs` rule flags *any* field read off an
+  object during render if that object also happens to carry a ref
+  anywhere in it — not just reads of the ref itself. `useInlineRename`
+  takes the caller's ref as an argument instead of returning one, so its
+  return value (`draft`, `commit`, `startEditing`, …) is plain state and
+  functions the rule leaves alone. Don't "simplify" this by bundling the
+  ref back into the return value — it reintroduces the lint error at every
+  call site.
+- **The project drawer's title editor is remounted (`key={project.id}`)
+  when the drawer switches projects.** The drawer itself is one long-lived
+  component instance reused for whichever project is open, so without a
+  fresh key, mid-edit state (or even just a stale `draft`) from the
+  previous project could leak into the next one. Task rows and area
+  sections don't need this: they're already list items keyed by their own
+  entity's id, so a different entity never reuses another's component
+  instance in the first place.
