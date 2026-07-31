@@ -20,10 +20,26 @@ kept current.
 - `TODO.md`: three more raised-but-deferred requests (editable task
   priority, project rename without opening the drawer, rapid multi-task
   capture scoped to a project) and the sort/filter-tasks gap.
+- **Experiment**: hover-reveal rename + delete icons on the sidebar's
+  project row, additive to the always-visible ones already in the project
+  drawer — not yet a settled pattern, see `design-principles.md`. Resolves
+  the "edit a project's name without opening its drawer first" request as
+  a side effect. Extracted `useDeleteProjectCascade()` so the drawer and
+  this row share one implementation of "unlink tasks, then delete the
+  project" instead of duplicating it.
 
 ### Changed
 
 - `TODO.md`'s "Delete" and "sidebar heading wrap" items moved to Shipped.
+
+### Fixed
+
+- Hiding the new sidebar rename/delete icons with `opacity: 0` still
+  reserved their layout width, silently truncating the project name at
+  rest — reintroducing the exact bug those icons exist despite (see
+  "Move project reassignment out of the cramped sidebar tree row", above).
+  Switched to `display: none` / `inline-block` so a hidden icon actually
+  gives its space back.
 
 ## 2026-07-30
 

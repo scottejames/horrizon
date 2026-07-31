@@ -10,10 +10,13 @@ interface AreaSectionProps {
   title: string;
   projects: Project[];
   openTaskCount: (projectId: string) => number;
+  linkedTaskCount: (projectId: string) => number;
   onOpenProject: (projectId: string) => void;
   onMoveProject: (projectId: string, areaId: string | undefined) => void;
   onRenameArea: (areaId: string, name: string) => void;
   onDeleteArea: (areaId: string) => void;
+  onRenameProject: (projectId: string, name: string) => void;
+  onDeleteProject: (projectId: string) => void;
 }
 
 /**
@@ -27,10 +30,13 @@ export function AreaSection({
   title,
   projects,
   openTaskCount,
+  linkedTaskCount,
   onOpenProject,
   onMoveProject,
   onRenameArea,
   onDeleteArea,
+  onRenameProject,
+  onDeleteProject,
 }: AreaSectionProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -134,7 +140,10 @@ export function AreaSection({
                 key={project.id}
                 project={project}
                 openTaskCount={openTaskCount(project.id)}
+                linkedTaskCount={linkedTaskCount(project.id)}
                 onOpenProject={onOpenProject}
+                onRename={(name) => onRenameProject(project.id, name)}
+                onDelete={() => onDeleteProject(project.id)}
               />
             ))
           )}

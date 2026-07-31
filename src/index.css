@@ -395,15 +395,24 @@ ul {
   background: var(--danger-wash);
 }
 .tree-area-header .rename-btn,
-.tree-area-header .delete-btn {
-  opacity: 0;
-  transition: opacity 0.12s ease;
+.tree-area-header .delete-btn,
+.tree-project .rename-btn,
+.tree-project .delete-btn {
+  /* display:none (not opacity) so a hidden icon gives its width back to the
+     name column at rest — an opacity toggle still reserves the box, which
+     silently reintroduces the exact truncation bug these icons exist
+     despite (see design-principles.md). */
+  display: none;
 }
 .tree-area:hover .tree-area-header .rename-btn,
 .tree-area:hover .tree-area-header .delete-btn,
 .tree-area:focus-within .tree-area-header .rename-btn,
-.tree-area:focus-within .tree-area-header .delete-btn {
-  opacity: 1;
+.tree-area:focus-within .tree-area-header .delete-btn,
+.tree-project:hover .rename-btn,
+.tree-project:hover .delete-btn,
+.tree-project:focus-within .rename-btn,
+.tree-project:focus-within .delete-btn {
+  display: inline-block;
 }
 .disclosure {
   display: inline-block;
@@ -447,9 +456,6 @@ ul {
   font-size: var(--fs-sm);
   flex-shrink: 0;
 }
-.tree-project details.project-move {
-  flex-shrink: 0;
-}
 .tree-project-open {
   display: flex;
   align-items: center;
@@ -461,6 +467,17 @@ ul {
   border: none;
   padding: 0;
   cursor: pointer;
+  color: var(--ink);
+}
+.tree-project-input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 3px 6px;
+  background: var(--surface);
   color: var(--ink);
 }
 .tree-add-project {

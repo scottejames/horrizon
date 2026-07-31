@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useConfirm } from "../context/ConfirmContext";
 import { useProjectStore } from "../context/ProjectStoreContext";
 import { useTaskStore } from "../context/TaskStoreContext";
+import { useDeleteProjectCascade } from "../hooks/useDeleteProjectCascade";
 import { useInlineRename } from "../hooks/useInlineRename";
 import { HORIZON_LABEL } from "../lib/horizon";
 import type { Project } from "../types";
@@ -75,8 +76,9 @@ function ProjectTitle({ project, linkedTaskCount, onRename, onDelete }: ProjectT
 }
 
 export function ProjectDrawer({ projectId, onClose }: ProjectDrawerProps) {
-  const { projects, areas, moveProjectToArea, renameProject, deleteProject } = useProjectStore();
-  const { tasksByProject, unlinkTasksFromProject } = useTaskStore();
+  const { projects, areas, moveProjectToArea, renameProject } = useProjectStore();
+  const { tasksByProject } = useTaskStore();
+  const deleteProjectCascade = useDeleteProjectCascade();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const moveDetailsRef = useRef<HTMLDetailsElement>(null);
 
@@ -113,8 +115,7 @@ export function ProjectDrawer({ projectId, onClose }: ProjectDrawerProps) {
 
   function handleDeleteProject() {
     if (!project) return;
-    unlinkTasksFromProject(project.id);
-    deleteProject(project.id);
+    deleteProjectCascade(project.id);
     onClose();
   }
 

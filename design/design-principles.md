@@ -203,3 +203,30 @@ into each other; components compose them (CODING_GUIDELINES.md #4).
   frontend design guidance draws between semantic (good/warning/critical)
   color and a brand's categorical accent. Don't reach for `--danger`
   outside an actual destructive-action context.
+
+## EXPERIMENT (2026-07-31, not yet a settled decision): hover-reveal rename/delete on the sidebar project row
+
+The earlier truncation bug (see "Move project reassignment out of the
+cramped sidebar tree row") removed all per-row controls from
+`ProjectTreeRow` and pushed rename/move/delete into the roomier project
+drawer. This reintroduces rename and delete *only* on that row, gated so
+they cost zero width at rest: `opacity: 0` until the row is
+hovered/focused, exactly the pattern already proven on the Area header.
+The drawer keeps its own always-visible rename/delete too — this is
+additive, not a replacement, specifically so the two approaches (hover-
+reveal in the tree vs. always-visible in the drawer) can be compared.
+
+**This is explicitly a trial**, not yet a house pattern — the "budget
+width against the name column first" rule from the earlier entry still
+holds; hover-reveal is the proposed way to satisfy both that rule and the
+want for in-tree controls at once. If it holds up, extending it to
+TaskRow (already roomy, so less urgent) is the natural next step; if
+hover-reveal turns out to be undiscoverable or annoying on
+touch/trackpad, revert `ProjectTreeRow` to the drawer-only pattern rather
+than tuning the opacity transition — the earlier entry's reasoning for
+that first design will still be correct.
+
+Project-delete's cascade-composition logic (unlink tasks, then delete the
+project) moved into `useDeleteProjectCascade()`, shared by the drawer and
+this row, rather than being duplicated a second time now that there are
+two call sites.

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useProjectStore } from "../context/ProjectStoreContext";
 import { useTaskStore } from "../context/TaskStoreContext";
+import { useDeleteProjectCascade } from "../hooks/useDeleteProjectCascade";
 import type { Commitment } from "../types";
 import { AreaSection } from "./AreaSection";
 import { InlineAddForm } from "./InlineAddForm";
@@ -12,9 +13,10 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeCommitment, onOpenProject, onOpenSomeday }: SidebarProps) {
-  const { areas, projects, addArea, addProject, moveProjectToArea, renameArea, deleteArea } =
+  const { areas, projects, addArea, addProject, moveProjectToArea, renameArea, deleteArea, renameProject } =
     useProjectStore();
   const { tasks } = useTaskStore();
+  const deleteProjectCascade = useDeleteProjectCascade();
   const [addingArea, setAddingArea] = useState(false);
   const [addingProject, setAddingProject] = useState(false);
 
@@ -23,6 +25,10 @@ export function Sidebar({ activeCommitment, onOpenProject, onOpenSomeday }: Side
 
   function openTaskCount(projectId: string): number {
     return tasks.filter((task) => task.projectId === projectId && task.state !== "done").length;
+  }
+
+  function linkedTaskCount(projectId: string): number {
+    return tasks.filter((task) => task.projectId === projectId).length;
   }
 
   const somedayCount = tasks.filter(
@@ -68,10 +74,13 @@ export function Sidebar({ activeCommitment, onOpenProject, onOpenSomeday }: Side
           title={area.name}
           projects={visibleProjects.filter((project) => project.areaId === area.id)}
           openTaskCount={openTaskCount}
+          linkedTaskCount={linkedTaskCount}
           onOpenProject={onOpenProject}
           onMoveProject={moveProjectToArea}
           onRenameArea={renameArea}
           onDeleteArea={deleteArea}
+          onRenameProject={renameProject}
+          onDeleteProject={deleteProjectCascade}
         />
       ))}
 
@@ -80,10 +89,13 @@ export function Sidebar({ activeCommitment, onOpenProject, onOpenSomeday }: Side
         title="Unassigned"
         projects={unassignedProjects}
         openTaskCount={openTaskCount}
+        linkedTaskCount={linkedTaskCount}
         onOpenProject={onOpenProject}
         onMoveProject={moveProjectToArea}
         onRenameArea={renameArea}
         onDeleteArea={deleteArea}
+        onRenameProject={renameProject}
+        onDeleteProject={deleteProjectCascade}
       />
 
       {addingProject ? (

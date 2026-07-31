@@ -23,11 +23,6 @@ Raised reviewing a real screenshot of the Areas of Responsibility tree
       only be set at capture time via quick-add's `!high`/`!med`/`!low`;
       there's no way to change it on an existing task. Raised 2026-07-31;
       not being built yet.
-- [ ] **Edit a project's name without opening its drawer first** — rename
-      currently only lives inside the project drawer (see Shipped), which
-      needs a click-in step before you can get to the pencil. Wanted:
-      renaming directly from wherever the project name already shows in
-      the main window. Raised 2026-07-31; not being built yet.
 - [ ] **Rapid multi-task capture scoped to a project** — from inside a
       project's drawer, add a run of tasks in quick succession that all
       default to Someday unless told otherwise (still honoring the usual
@@ -115,3 +110,16 @@ building.
       Deleting an Area unassigns its Projects; deleting a Project unlinks
       its Tasks. Neither cascades further — Tasks and Projects are never
       deleted just because their parent was.
+- [x] ~~Edit a project's name without opening its drawer first~~ — resolved
+      as a side effect of the hover-reveal experiment below: rename now
+      lives directly on the sidebar tree row too.
+- [x] **EXPERIMENT** (not yet a settled UI pattern): hover-reveal rename +
+      delete icons on the sidebar's project row, additive to the
+      always-visible ones already in the project drawer. Caught and fixed a
+      real bug while building it: hiding the icons with `opacity: 0` still
+      reserved their layout width, silently truncating the name at rest —
+      the exact bug these icons exist despite. Switched to `display: none`
+      / `inline-block` so a hidden icon gives its space back. If this reads
+      well in practice, extend it to TaskRow next; if hover-reveal turns
+      out to be annoying on touch/trackpad, revert to drawer-only rather
+      than tuning it further — see design-principles.md.
