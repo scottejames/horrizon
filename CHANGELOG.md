@@ -8,6 +8,31 @@ kept current.
 
 ### Added
 
+- Four items from `TODO.md`'s "Up next": each Area's collapsed/expanded
+  state now persists across reloads (`localStorage`, keyed by area id);
+  a search/priority/project filter and a Priority/Alphabetical/Project
+  sort mode above each horizon list (`src/lib/taskListView.ts`, with its
+  own unit tests — the open/deferred/done grouping stays the primary sort
+  key regardless of mode); a task's priority can now be changed after
+  creation via a dropdown on the priority signal (`updatePriority` in
+  `TaskStoreContext`); and a rapid multi-task quick-add scoped to a
+  project inside its drawer, defaulting to Someday unless a schedule
+  keyword is typed (required adding `horizonExplicit` to `parseQuickAdd`'s
+  return so a caller can tell "no keyword" apart from "the keyword was
+  today"). The fifth "Up next" item — a real review mechanism for
+  forgotten Someday tasks — was deliberately skipped: it's flagged in
+  `TODO.md` as explicitly not a priority and is more of an open design
+  question than a scoped feature.
+
+### Changed
+
+- Rescheduling a task is now one click instead of two: the "Defer ▾"/
+  "Schedule ▾" dropdown is replaced by three always-visible, color-coded
+  buttons per task row — one for each horizon the task *isn't* currently
+  on (`Tdy`/`Tmrw`/`Wk`/`Sd`, colored the same as the horizon tabs and
+  drawer dots). Applies uniformly to every horizon, not just Someday. See
+  design-principles.md's "Rescheduling is one click, not two".
+
 - Delete for any Task, Project, or Area, each behind a single global
   Yes/No confirmation dialog (`ConfirmContext`/`useConfirm()`) that states
   the specific consequence — "N projects will move to Unassigned," "N

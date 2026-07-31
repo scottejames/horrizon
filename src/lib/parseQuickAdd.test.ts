@@ -8,6 +8,7 @@ describe("parseQuickAdd", () => {
       priority: null,
       project: null,
       horizon: "today",
+      horizonExplicit: false,
       commitment: null,
     });
   });
@@ -33,10 +34,17 @@ describe("parseQuickAdd", () => {
   });
 
   it("recognizes every schedule keyword", () => {
-    expect(parseQuickAdd("Task today")).toMatchObject({ horizon: "today" });
-    expect(parseQuickAdd("Task tomorrow")).toMatchObject({ horizon: "tomorrow" });
-    expect(parseQuickAdd("Task next week")).toMatchObject({ horizon: "week" });
-    expect(parseQuickAdd("Task someday")).toMatchObject({ horizon: "someday" });
+    expect(parseQuickAdd("Task today")).toMatchObject({ horizon: "today", horizonExplicit: true });
+    expect(parseQuickAdd("Task tomorrow")).toMatchObject({ horizon: "tomorrow", horizonExplicit: true });
+    expect(parseQuickAdd("Task next week")).toMatchObject({ horizon: "week", horizonExplicit: true });
+    expect(parseQuickAdd("Task someday")).toMatchObject({ horizon: "someday", horizonExplicit: true });
+  });
+
+  it("marks horizon as not explicit when no schedule keyword is present", () => {
+    expect(parseQuickAdd("Task with no schedule")).toMatchObject({
+      horizon: "today",
+      horizonExplicit: false,
+    });
   });
 
   it("recognizes both commitment keywords", () => {
@@ -50,6 +58,7 @@ describe("parseQuickAdd", () => {
       priority: "high",
       project: "KIT",
       horizon: "tomorrow",
+      horizonExplicit: true,
       commitment: "work",
     });
   });

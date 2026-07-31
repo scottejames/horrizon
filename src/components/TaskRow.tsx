@@ -1,8 +1,8 @@
 import { useRef } from "react";
 import { useConfirm } from "../context/ConfirmContext";
 import { useInlineRename } from "../hooks/useInlineRename";
-import { HORIZON_LABEL, HORIZON_ORDER } from "../lib/horizon";
-import type { Horizon, Project, Task } from "../types";
+import { HORIZON_LABEL, HORIZON_ORDER, HORIZON_SHORT_LABEL } from "../lib/horizon";
+import type { Horizon, Priority, Project, Task } from "../types";
 
 interface TaskRowProps {
   task: Task;
@@ -10,9 +10,13 @@ interface TaskRowProps {
   onToggleDone: () => void;
   onMove: (target: Horizon) => void;
   onRename: (description: string) => void;
+  onChangePriority: (priority: Priority) => void;
   onDelete: () => void;
   onOpenProject: (projectId: string) => void;
 }
+
+const PRIORITY_ORDER: Priority[] = ["high", "med", "low"];
+const PRIORITY_LABEL: Record<Priority, string> = { high: "High", med: "Med", low: "Low" };
 
 export function TaskRow({
   task,
@@ -20,21 +24,19 @@ export function TaskRow({
   onToggleDone,
   onMove,
   onRename,
+  onChangePriority,
   onDelete,
   onOpenProject,
 }: TaskRowProps) {
-  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const priorityDetailsRef = useRef<HTMLDetailsElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
   const rename = useInlineRename(task.description, onRename, renameInputRef);
   const requestConfirm = useConfirm();
-  const isSomeday = task.horizon === "someday";
-  const targets = isSomeday
-    ? (["today", "tomorrow", "week"] as Horizon[])
-    : HORIZON_ORDER.filter((horizon) => horizon !== task.horizon);
+  const rescheduleTargets = HORIZON_ORDER.filter((horizon) => horizon !== task.horizon);
 
-  function handleMove(target: Horizon) {
-    onMove(target);
-    if (detailsRef.current) detailsRef.current.open = false;
+  function handleChangePriority(priority: Priority) {
+    onChangePriority(priority);
+    if (priorityDetailsRef.current) priorityDetailsRef.current.open = false;
   }
 
   function handleDelete() {
@@ -50,11 +52,33 @@ export function TaskRow({
         aria-pressed={task.state === "done"}
         onClick={onToggleDone}
       />
-      <span className={`signal signal--${task.priority}`} title={`${task.priority} priority`}>
-        <span></span>
-        <span></span>
-        <span></span>
-      </span>
+      <details className="priority-menu" ref={priorityDetailsRef}>
+        <summary
+          className={`signal signal--${task.priority}`}
+          aria-label={`Priority: ${PRIORITY_LABEL[task.priority]}. Click to change.`}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </summary>
+        <div className="priority-menu-list defer-menu">
+          {PRIORITY_ORDER.map((priority) => (
+            <button
+              key={priority}
+              type="button"
+              className={priority === task.priority ? "is-current" : undefined}
+              onClick={() => handleChangePriority(priority)}
+            >
+              <span className={`signal signal--${priority}`} aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+              </span>
+              {PRIORITY_LABEL[priority]}
+            </button>
+          ))}
+        </div>
+      </details>
       {rename.isEditing ? (
         <input
           ref={renameInputRef}
@@ -98,16 +122,18 @@ export function TaskRow({
         </button>
       )}
       <div className="task-actions">
-        <details className="defer" ref={detailsRef}>
-          <summary>{isSomeday ? "Schedule ▾" : "Defer ▾"}</summary>
-          <div className="defer-menu">
-            {targets.map((target) => (
-              <button key={target} type="button" onClick={() => handleMove(target)}>
-                {HORIZON_LABEL[target]}
-              </button>
-            ))}
-          </div>
-        </details>
+        {rescheduleTargets.map((target) => (
+          <button
+            key={target}
+            type="button"
+            className={`reschedule-btn rb-${target}`}
+            title={`${task.horizon === "someday" ? "Schedule" : "Move"} to ${HORIZON_LABEL[target]}`}
+            aria-label={`${task.horizon === "someday" ? "Schedule" : "Move"} to ${HORIZON_LABEL[target]}`}
+            onClick={() => onMove(target)}
+          >
+            {HORIZON_SHORT_LABEL[target]}
+          </button>
+        ))}
       </div>
     </li>
   );

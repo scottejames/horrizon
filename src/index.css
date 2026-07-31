@@ -800,6 +800,49 @@ ul {
   font-style: italic;
   padding: 8px 2px;
 }
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-style: normal;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.list-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 2px 14px;
+}
+.list-search {
+  flex: 1;
+  min-width: 140px;
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  border: 1.5px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 7px 12px;
+}
+.list-search:focus-visible {
+  border-color: var(--accent);
+}
+.list-filter {
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  border: 1.5px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 7px 10px;
+  cursor: pointer;
+  max-width: 160px;
+}
 
 /* ============ Task rows ============ */
 .task-list {
@@ -882,6 +925,38 @@ ul {
   background: var(--ink);
 }
 
+.priority-menu {
+  position: relative;
+}
+.priority-menu > summary.signal {
+  list-style: none;
+  cursor: pointer;
+  padding: 3px;
+  margin: -3px;
+  border-radius: 4px;
+}
+.priority-menu > summary.signal::-webkit-details-marker {
+  display: none;
+}
+.priority-menu > summary.signal:hover {
+  background: var(--surface-2);
+}
+.priority-menu[open] > summary.signal {
+  background: var(--surface-2);
+}
+.priority-menu-list.defer-menu {
+  min-width: 100px;
+}
+.priority-menu-list button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.priority-menu-list button.is-current {
+  background: var(--surface-2);
+  font-weight: 600;
+}
+
 .task-desc {
   flex: 1;
   font-size: var(--fs-base);
@@ -933,12 +1008,52 @@ ul {
 
 .task-actions {
   flex-shrink: 0;
+  display: flex;
+  gap: 4px;
 }
-details.defer,
+.reschedule-btn {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xxs);
+  font-weight: 700;
+  padding: 5px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.reschedule-btn.rb-today {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.reschedule-btn.rb-today:hover {
+  background: var(--accent-wash);
+}
+.reschedule-btn.rb-tomorrow {
+  border-color: var(--tomorrow);
+  color: var(--tomorrow);
+}
+.reschedule-btn.rb-tomorrow:hover {
+  background: var(--tomorrow-wash);
+}
+.reschedule-btn.rb-week {
+  border-color: var(--week);
+  color: var(--week);
+}
+.reschedule-btn.rb-week:hover {
+  background: var(--week-wash);
+}
+.reschedule-btn.rb-someday {
+  border-color: var(--someday);
+  color: var(--someday);
+}
+.reschedule-btn.rb-someday:hover {
+  background: var(--someday-wash);
+}
 details.project-move {
   position: relative;
 }
-details.defer summary,
 details.project-move summary {
   list-style: none;
   cursor: pointer;
@@ -950,16 +1065,13 @@ details.project-move summary {
   color: var(--ink-soft);
   white-space: nowrap;
 }
-details.defer summary::-webkit-details-marker,
 details.project-move summary::-webkit-details-marker {
   display: none;
 }
-details.defer summary:hover,
 details.project-move summary:hover {
   color: var(--ink);
   border-color: var(--ink-soft);
 }
-details.defer[open] summary,
 details.project-move[open] summary {
   color: var(--accent);
   border-color: var(--accent);
@@ -1237,6 +1349,24 @@ details.drawer-move[open] summary {
   border-color: var(--danger);
   color: var(--danger);
 }
+.drawer-rapid-add {
+  margin-bottom: 14px;
+}
+.drawer-rapid-add .capture-row {
+  gap: 8px;
+}
+.drawer-rapid-add .capture-input {
+  padding: 8px 12px;
+  font-size: var(--fs-sm);
+}
+.drawer-rapid-add .capture-submit {
+  padding: 0 16px;
+  font-size: var(--fs-sm);
+}
+.drawer-rapid-add .capture-hint {
+  margin-top: 6px;
+}
+
 .drawer-list {
   display: flex;
   flex-direction: column;

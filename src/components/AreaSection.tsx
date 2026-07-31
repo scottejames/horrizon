@@ -1,4 +1,4 @@
-import { useRef, useState, type DragEvent } from "react";
+import { useEffect, useRef, useState, type DragEvent } from "react";
 import { useConfirm } from "../context/ConfirmContext";
 import { useInlineRename } from "../hooks/useInlineRename";
 import type { Project } from "../types";
@@ -38,8 +38,19 @@ export function AreaSection({
   onRenameProject,
   onDeleteProject,
 }: AreaSectionProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  // "Unassigned" has no areaId of its own, so it gets a fixed key — every
+  // real area's key is stable across reloads since area ids never change.
+  const collapseKey = `horizon.areaCollapsed.${areaId ?? "unassigned"}`;
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem(collapseKey) === "1");
   const [dragOver, setDragOver] = useState(false);
+
+  useEffect(() => {
+    if (collapsed) {
+      localStorage.setItem(collapseKey, "1");
+    } else {
+      localStorage.removeItem(collapseKey);
+    }
+  }, [collapsed, collapseKey]);
   const renameInputRef = useRef<HTMLInputElement>(null);
   const rename = useInlineRename(
     title,

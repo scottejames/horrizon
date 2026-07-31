@@ -35,12 +35,13 @@ just "open, but on a different day."
 ## Someday → scheduled is one-way and manual, never automatic
 
 Someday tasks never get swept onto a dated list by any background process —
-the only way out of Someday is an explicit "Schedule ▾" action the user takes
+the only way out of Someday is an explicit reschedule action the user takes
 while reviewing the list. This is the inverse action of Defer (which pushes a
 dated task out to a later horizon) rather than the same mechanism, and the UI
-should keep using separate verbs/labels ("Defer" vs "Schedule") for the two
+should keep using separate verbs ("Defer" vs "Schedule", in each button's
+`title`/`aria-label` — see the one-click reschedule entry below) for the two
 directions even though they're both "change this task's horizon" under the
-hood — the label carries which direction the user is choosing.
+hood — the verb carries which direction the user is choosing.
 
 ## Project detail opens as a drawer, not a page
 
@@ -326,3 +327,48 @@ even though the per-task detail behind it is gone.
   otherwise. Checked twice on purpose (once in `App.tsx` before the prop is
   even passed down, again inside `ProjectDrawer` itself) — don't remove
   either check as "redundant."
+
+## Sort mode is secondary to the open/deferred/done grouping, never a replacement for it
+
+Added 2026-07-31. The horizon list's sort/filter controls (`src/lib/
+taskListView.ts`) let you choose Priority, Alphabetical, or Project
+ordering — but whichever mode is active, a done task never sorts above an
+open one, and a deferred task never sorts above an open one either.
+`sortTasks` always applies `stateRank` first and only lets the chosen mode
+break ties within a state group. If a future sort mode is added, keep this
+— a to-do list where "done" can outrank "still to do" defeats the point of
+the list, however the tasks within each group happen to be ordered.
+
+## The project drawer's rapid-add defaults differently than the main capture bar, on purpose
+
+Added 2026-07-31. `CaptureBar` defaults an unscheduled task to Today —
+matching the app's core premise, an app for things you want to do today.
+`ProjectRapidCapture` (inside the project drawer) instead defaults to
+Someday, because its use case is different: brain-dumping everything a
+project might ever need, not committing to doing all of it today. Both
+still honor an explicit `today`/`tomorrow`/`next week`/`someday` keyword
+the same way. This needed `parseQuickAdd` to expose `horizonExplicit`
+(false when `horizon` is only the "today" fallback) rather than baking one
+default into the parser — don't remove that field to "simplify" the
+parser; it's what lets two different callers pick two different sensible
+defaults from the same parsing logic.
+
+## Rescheduling is one click, not two
+
+Added 2026-07-31, replacing the "Defer ▾"/"Schedule ▾" dropdown that
+shipped 2026-07-30. That dropdown took two clicks (open it, then pick a
+target) for what's one of the most frequent actions in the app — moving a
+task to a different horizon. Every task row now shows the other three
+horizons as always-visible, color-coded one-click buttons
+(`HORIZON_ORDER.filter((h) => h !== task.horizon)`, so it's always exactly
+the three horizons the task *isn't* currently on, in a fixed order) instead
+of a menu that has to be opened first. The colors reuse the same
+`--accent`/`--tomorrow`/`--week`/`--someday` tokens as the horizon tabs and
+`.horizon-dot`, not a new palette — so a task row's reschedule buttons read
+as "the same four horizons" the rest of the app already color-codes, not a
+new visual language to learn. Labels are abbreviated (`Tdy`/`Tmrw`/`Wk`/`Sd`
+— see `HORIZON_SHORT_LABEL` in `lib/horizon.ts`) to fit three buttons in the
+same row that used to hold one dropdown button; the full word is still in
+each button's `title`/`aria-label` for anyone who needs it spelled out. If
+a future change adds a fifth horizon, revisit this — four buttons might
+still fit, but don't let it grow unbounded before checking.

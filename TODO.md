@@ -12,23 +12,11 @@ Raised reviewing a real screenshot of the Areas of Responsibility tree
 
 - [x] ~~Confirm the sidebar heading no longer wraps~~ — verified with a
       real Playwright screenshot on 2026-07-30: fits on one line at 270px.
-- [ ] Persist each Area's collapsed/expanded state across sessions —
-      currently everything re-expands on every reload.
-- [ ] **Sort and filter tasks** within a horizon list. Today the sort order
-      is fixed (open before deferred before done, then priority) with no
-      user control, and there's no way to filter a list down — by project,
-      priority, or a text search — other than the existing horizon/
-      commitment split. Raised 2026-07-31; not being built yet.
-- [ ] **Edit a task's priority** after it's created — priority can currently
-      only be set at capture time via quick-add's `!high`/`!med`/`!low`;
-      there's no way to change it on an existing task. Raised 2026-07-31;
-      not being built yet.
-- [ ] **Rapid multi-task capture scoped to a project** — from inside a
-      project's drawer, add a run of tasks in quick succession that all
-      default to Someday unless told otherwise (still honoring the usual
-      `today`/`tomorrow`/`next week` overrides) — useful for brain-dumping
-      everything for a project at once rather than one quick-add entry at a
-      time. Raised 2026-07-31; not being built yet.
+- [x] ~~Persist each Area's collapsed/expanded state across sessions~~ —
+      see Shipped.
+- [x] ~~Sort and filter tasks within a horizon list~~ — see Shipped.
+- [x] ~~Edit a task's priority after it's created~~ — see Shipped.
+- [x] ~~Rapid multi-task capture scoped to a project~~ — see Shipped.
 - [ ] **A real review mechanism, so tasks — Someday ones especially — don't
       get silently forgotten.** Right now nothing ever prompts you to
       revisit a Someday task; it just sits there indefinitely unless you
@@ -106,6 +94,13 @@ building.
       actual generated summary instead of a fixed sentence template. Bigger
       lift than the feature justified for a first pass; revisit if the
       template version feels too mechanical in practice.
+- [ ] **A saved/default sort+filter per horizon tab.** The sort/filter
+      controls shipped 2026-07-31 (see Shipped) reset to "Any priority /
+      Any project / Sort: Priority" on every reload and are shared across
+      all four horizon tabs (switching tabs doesn't reset them, since
+      TaskList is one long-lived component instance). Worth revisiting if
+      that shared-across-tabs behavior turns out to be the wrong call in
+      practice, or if a per-tab remembered preference is wanted.
 
 ## Infrastructure
 
@@ -160,3 +155,30 @@ building.
       template-generated text, not a real AI summary (see the Later
       section below), and the 24h cycle only runs while the app is open
       (client-side interval, no scheduled backend job).
+- [x] Each Area's collapsed/expanded state persists across reloads —
+      `localStorage`, keyed by area id (a fixed key for the synthetic
+      "Unassigned" bucket, which has no id of its own).
+- [x] Sort and filter within a horizon list — a search box (matches the
+      description), a priority filter, a project filter (including "No
+      project"), and a sort mode (Priority / Alphabetical / Project),
+      added above each horizon's task list. The open-before-deferred-
+      before-done grouping is always the primary sort key regardless of
+      mode — a done task never jumps back above open ones. Pure filter/sort
+      logic lives in `src/lib/taskListView.ts` with its own unit tests, not
+      inline in the component.
+- [x] Edit a task's priority after it's created — the priority "signal"
+      bars are now a dropdown (`updatePriority` in `TaskStoreContext`),
+      not just a fixed indicator set at capture time.
+- [x] Rapid multi-task capture scoped to a project — a quick-add inside the
+      project drawer (`ProjectRapidCapture` in `ProjectDrawer.tsx`) that
+      stays open and refocuses after each add, always links to the open
+      project, and defaults to Someday unless a schedule keyword is typed
+      (the one deliberate difference from the main capture bar, which
+      defaults to Today). Required adding `horizonExplicit` to
+      `parseQuickAdd`'s return so a caller can tell "no keyword typed" apart
+      from "the keyword was today" and pick its own default.
+- [x] One-click rescheduling — the "Defer ▾"/"Schedule ▾" dropdown on each
+      task row is replaced by three always-visible, color-coded buttons
+      (one per horizon the task isn't currently on), applied uniformly
+      across all four horizons, not just Someday. See design-principles.md's
+      "Rescheduling is one click, not two".

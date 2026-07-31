@@ -5,6 +5,8 @@ export interface ParsedQuickAdd {
   priority: Priority | null;
   project: string | null;
   horizon: Horizon;
+  /** False when `horizon` is the "today" fallback rather than a keyword the user actually typed — lets a caller apply its own default (e.g. the project drawer's rapid-add defaults to someday instead). */
+  horizonExplicit: boolean;
   /** `null` means not specified in the text — caller decides the default. */
   commitment: Commitment | null;
 }
@@ -42,6 +44,7 @@ const PROJECT_PATTERN = /#([A-Za-z0-9]+)/;
 export function parseQuickAdd(raw: string): ParsedQuickAdd {
   let text = raw;
   let horizon: Horizon = "today";
+  let horizonExplicit = false;
   let priority: Priority | null = null;
   let project: string | null = null;
   let commitment: Commitment | null = null;
@@ -49,6 +52,7 @@ export function parseQuickAdd(raw: string): ParsedQuickAdd {
   for (const [pattern, value] of SCHEDULE_PATTERNS) {
     if (pattern.test(text)) {
       horizon = value;
+      horizonExplicit = true;
       text = text.replace(pattern, " ");
       break;
     }
@@ -78,5 +82,5 @@ export function parseQuickAdd(raw: string): ParsedQuickAdd {
 
   const description = text.replace(/\s+/g, " ").trim();
 
-  return { description, priority, project, horizon, commitment };
+  return { description, priority, project, horizon, horizonExplicit, commitment };
 }

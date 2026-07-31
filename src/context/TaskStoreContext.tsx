@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { client } from "../lib/dataClient";
 import { toCommitment, toHorizon, toPriority, toTaskState } from "../lib/guards";
+import { priorityRank, stateRank } from "../lib/taskRank";
 import type { Commitment, Horizon, Priority, Task } from "../types";
 
 export interface AddTaskInput {
@@ -20,6 +21,7 @@ interface TaskStoreValue {
   addTask: (input: AddTaskInput) => void;
   toggleDone: (id: string) => void;
   updateDescription: (id: string, description: string) => void;
+  updatePriority: (id: string, priority: Priority) => void;
   deleteTask: (id: string) => void;
   /** Bulk delete, used by the narrative-maintenance purge. */
   deleteTasks: (ids: string[]) => void;
@@ -35,13 +37,6 @@ interface TaskStoreValue {
 }
 
 const TaskStoreContext = createContext<TaskStoreValue | null>(null);
-
-function priorityRank(priority: Priority): number {
-  return priority === "high" ? 0 : priority === "med" ? 1 : 2;
-}
-function stateRank(state: Task["state"]): number {
-  return state === "done" ? 2 : state === "deferred" ? 1 : 0;
-}
 
 export function TaskStoreProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -117,6 +112,11 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
     client.models.Task.update({ id, description }).catch(console.error);
   }
 
+  function updatePriority(id: string, priority: Priority) {
+    setTasks((prev) => prev.map((task) => (task.id === id ? { ...task, priority } : task)));
+    client.models.Task.update({ id, priority }).catch(console.error);
+  }
+
   function deleteTask(id: string) {
     setTasks((prev) => prev.filter((task) => task.id !== id));
     client.models.Task.delete({ id }).catch(console.error);
@@ -177,6 +177,7 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
         addTask,
         toggleDone,
         updateDescription,
+        updatePriority,
         deleteTask,
         deleteTasks,
         unlinkTasksFromProject,

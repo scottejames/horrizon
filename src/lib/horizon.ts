@@ -9,6 +9,14 @@ export const HORIZON_LABEL: Record<Horizon, string> = {
   someday: "Someday",
 };
 
+/** Compact labels for the one-click reschedule buttons on a task row — see design-principles.md. */
+export const HORIZON_SHORT_LABEL: Record<Horizon, string> = {
+  today: "Tdy",
+  tomorrow: "Tmrw",
+  week: "Wk",
+  someday: "Sd",
+};
+
 export const HORIZON_INTRO: Record<Horizon, string> = {
   today: "Everything you're committing to today.",
   tomorrow: "Waiting for tomorrow — nothing here moves until then.",

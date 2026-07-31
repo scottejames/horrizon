@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useConfirm } from "../context/ConfirmContext";
 import { useProjectStore } from "../context/ProjectStoreContext";
 import { useTaskStore } from "../context/TaskStoreContext";
@@ -7,6 +7,7 @@ import { useDeleteProjectCascade } from "../hooks/useDeleteProjectCascade";
 import { useInlineRename } from "../hooks/useInlineRename";
 import type { useNarrativeMaintenance } from "../hooks/useNarrativeMaintenance";
 import { HORIZON_LABEL } from "../lib/horizon";
+import { parseQuickAdd } from "../lib/parseQuickAdd";
 import type { Project } from "../types";
 
 interface ProjectDrawerProps {
@@ -76,6 +77,74 @@ function ProjectTitle({ project, linkedTaskCount, onRename, onDelete }: ProjectT
       >
         🗑
       </button>
+    </div>
+  );
+}
+
+interface ProjectRapidCaptureProps {
+  project: Project;
+}
+
+/**
+ * A quick-add scoped to one project: stays open and refocuses after each
+ * add so a run of tasks can be brain-dumped in quick succession, and — the
+ * one deliberate difference from the main CaptureBar — defaults to Someday
+ * rather than Today when no schedule keyword is typed, since that's the
+ * common case for "everything this project might need eventually." Any
+ * `#code` typed here is ignored; the task is always linked to this project.
+ */
+function ProjectRapidCapture({ project }: ProjectRapidCaptureProps) {
+  const [value, setValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { addTask } = useTaskStore();
+
+  const parsed = parseQuickAdd(value);
+  const horizon = parsed.horizonExplicit ? parsed.horizon : "someday";
+  const commitment = parsed.commitment ?? project.commitment;
+
+  function handleAdd() {
+    if (!parsed.description) return;
+    addTask({
+      description: parsed.description,
+      priority: parsed.priority ?? "med",
+      horizon,
+      commitment,
+      projectId: project.id,
+    });
+    setValue("");
+    inputRef.current?.focus();
+  }
+
+  function handleKeyDown(event: ReactKeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter") handleAdd();
+  }
+
+  return (
+    <div className="drawer-rapid-add">
+      <div className="capture-row">
+        <input
+          ref={inputRef}
+          className="capture-input"
+          type="text"
+          autoComplete="off"
+          placeholder="Add another task… (defaults to Someday)"
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          onKeyDown={handleKeyDown}
+        />
+        <button
+          type="button"
+          className="capture-submit"
+          disabled={!parsed.description}
+          onClick={handleAdd}
+        >
+          Add
+        </button>
+      </div>
+      <p className="capture-hint">
+        Defaults to <b>Someday</b> unless you type <b>today / tomorrow / next week</b> &middot;{" "}
+        <b>!high !med !low</b> priority &middot; always linked to #{project.shortCode}
+      </p>
     </div>
   );
 }
@@ -213,6 +282,7 @@ export function ProjectDrawer({
                 </div>
               </div>
             )}
+            <ProjectRapidCapture key={project.id} project={project} />
             <ul className="drawer-list">
               {linkedTasks.length === 0 ? (
                 <li className="drawer-empty">No todos linked to #{project.shortCode} yet.</li>
