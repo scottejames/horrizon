@@ -113,15 +113,17 @@ export function Sidebar({ activeCommitment, onOpenProject, onOpenSomeday }: Side
         </button>
       )}
 
-      <div className="sidebar-footer">
-        <button type="button" className="someday-link" onClick={onOpenSomeday}>
-          <span>
-            <strong>{somedayCount} in Someday</strong>
-            <span className="hint">parked — review to schedule</span>
-          </span>
-          <span aria-hidden="true">&rarr;</span>
-        </button>
-      </div>
+      {somedayCount > 0 && (
+        <div className="sidebar-footer">
+          <button type="button" className="someday-link" onClick={onOpenSomeday}>
+            <span>
+              <strong>{somedayCount} in Someday</strong>
+              <span className="hint">parked — review to schedule</span>
+            </span>
+            <span aria-hidden="true">&rarr;</span>
+          </button>
+        </div>
+      )}
     </aside>
   );
 }

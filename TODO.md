@@ -29,6 +29,22 @@ Raised reviewing a real screenshot of the Areas of Responsibility tree
       `today`/`tomorrow`/`next week` overrides) — useful for brain-dumping
       everything for a project at once rather than one quick-add entry at a
       time. Raised 2026-07-31; not being built yet.
+- [ ] **A real review mechanism, so tasks — Someday ones especially — don't
+      get silently forgotten.** Right now nothing ever prompts you to
+      revisit a Someday task; it just sits there indefinitely unless you
+      happen to open that tab yourself. **Explicitly not a priority right
+      now.** Related to the "Scheduled review cadence per Area/Project"
+      idea below (OmniFocus's per-project review interval) — when this
+      gets picked up, decide whether it's that general mechanism or
+      something Someday-specific, rather than building both separately.
+      Raised 2026-07-31.
+      - The sidebar's "N in Someday" indicator (2026-07-31) currently uses
+        the simplest possible stand-in rule for "needs review": it shows
+        whenever there's at least one Someday task, with no concept of how
+        long it's been sitting there or whether it's already been looked
+        at. That rule is a placeholder, not a considered design — revisit
+        it together with the real review mechanism above, not in
+        isolation.
 
 ## Later — features worth considering (researched 2026-07-30)
 

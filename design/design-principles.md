@@ -243,3 +243,19 @@ focus). Nothing here is always-visible anymore; the drawer's earlier
   focusable sibling for the icons to hand off from, solve it the same way
   the drawer did (widen the focus scope, or autofocus something), not by
   making that one icon always-visible.
+
+## The sidebar's Someday indicator only exists when there's something to review
+
+Added 2026-07-31. The "N in Someday" footer box (and its `→` shortcut into
+the Someday tab) doesn't render at all when the count is zero — "0 in
+Someday" told the reader nothing they didn't already know, and a
+permanently-present box just to occasionally show a real number is worse
+than a box that only shows up when it means something.
+
+The trigger rule is deliberately the simplest possible one for now: any
+Someday task at all. This is a **placeholder**, not a considered stance —
+see `TODO.md`'s "a real review mechanism" entry, which is explicitly not a
+current priority but is where this rule should be reconsidered once it is
+(e.g. age-based, or tied to an actual review cadence rather than mere
+presence). Don't read the current rule as settled the way the rest of this
+document's entries are.
