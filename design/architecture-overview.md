@@ -41,10 +41,37 @@ derived, and how the frontend still defaults it sensibly at creation time.
 
 `AreaOfResponsibility` was renamed from `Program` on 2026-07-30 (see
 `design-principles.md`'s "Programs are Areas of Responsibility" entry) — a
-genuine schema/table rename, not just a frontend label change. Any
-`Program`/`Project.programId` data already sitting in a deployed environment
-does not migrate automatically; at this stage that's only ever been our own
-test data, so it was an acceptable drop, not a real migration to plan for.
+genuine schema/table rename, not just a frontend label change.
+
+### Schema changes that destroy data
+
+Renaming a model isn't something Amplify can apply as an in-place update —
+the renamed model is a new DynamoDB table under the new name, and the old
+table (with everything in it) is deleted. Adding or removing a plain field
+doesn't have this problem: DynamoDB items are schemaless past the key, so
+existing rows are untouched either way. Only structural changes like a
+rename force a replacement.
+
+The `Program` → `AreaOfResponsibility` rename above is the one time this
+has actually happened, and it hit **both** environments the moment each
+one redeployed that change — confirmed directly from the tables
+themselves: in both sandbox and production, the `AreaOfResponsibility`
+table's creation timestamp is hours after the `Task`/`Project` tables in
+that same environment, while `Task`/`Project` have never been recreated
+since each environment was first stood up (including through the
+`commitment` field addition, which only added fields and — as expected —
+replaced nothing). At the time, that data loss was written off as
+acceptable because it was only ever our own test data. **That assumption
+no longer holds** — production now holds real usage (non-test Areas,
+Projects, and Tasks), so a future rename would delete real work, not
+throwaway rows.
+
+**Rule going forward** (also in `CODING_GUIDELINES.md` #5): never rename a
+model, or otherwise force a table replacement, against a deployed
+environment without flagging it and getting explicit sign-off first. If a
+rename is truly needed later, that means planning an actual migration
+(stand up the new table, copy data across, cut over) rather than a blind
+rename-and-redeploy.
 
 The frontend never calls `generateClient()` with an implicit auth mode —
 `src/lib/dataClient.ts` sets `authMode: "userPool"` explicitly, since the

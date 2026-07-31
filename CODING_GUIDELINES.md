@@ -169,6 +169,16 @@ modules instead of classes. Treat "a class" below as "a function, hook, or modul
   `belongsTo`/`hasMany`.** `Task.projectId` is a plain optional string specifically so
   deleting a project can detach its tasks (not cascade-delete them) using ordinary
   application logic, instead of fighting a relation's own delete policy.
+- **Never rename a model (or otherwise force a table replacement) against a
+  deployed environment without flagging it first and getting explicit sign-off.**
+  Amplify can't rename a DynamoDB table in place — a renamed model is a brand-new
+  table under the new name, and the old one (with all its data) is deleted. This
+  already happened once for real: renaming `Program` to `AreaOfResponsibility`
+  wiped that table in both the sandbox and production the moment the change
+  deployed (see `design/architecture-overview.md`'s "Schema changes that destroy
+  data" entry). Adding/removing a plain field doesn't have this problem — DynamoDB
+  items are schemaless past the key, so only structural changes like a rename need
+  this caution.
 
 ## 6. Testing (Vitest + Testing Library + Playwright)
 
