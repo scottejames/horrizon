@@ -10,12 +10,30 @@ into `Shipped` (checked) rather than deleting the line — see
 Raised reviewing a real screenshot of the Areas of Responsibility tree
 (2026-07-30):
 
-- [ ] **Delete** an Area, Project, or Task — also missing everywhere. A
-      Task can only be marked Done, never removed.
 - [x] ~~Confirm the sidebar heading no longer wraps~~ — verified with a
       real Playwright screenshot on 2026-07-30: fits on one line at 270px.
 - [ ] Persist each Area's collapsed/expanded state across sessions —
       currently everything re-expands on every reload.
+- [ ] **Sort and filter tasks** within a horizon list. Today the sort order
+      is fixed (open before deferred before done, then priority) with no
+      user control, and there's no way to filter a list down — by project,
+      priority, or a text search — other than the existing horizon/
+      commitment split. Raised 2026-07-31; not being built yet.
+- [ ] **Edit a task's priority** after it's created — priority can currently
+      only be set at capture time via quick-add's `!high`/`!med`/`!low`;
+      there's no way to change it on an existing task. Raised 2026-07-31;
+      not being built yet.
+- [ ] **Edit a project's name without opening its drawer first** — rename
+      currently only lives inside the project drawer (see Shipped), which
+      needs a click-in step before you can get to the pencil. Wanted:
+      renaming directly from wherever the project name already shows in
+      the main window. Raised 2026-07-31; not being built yet.
+- [ ] **Rapid multi-task capture scoped to a project** — from inside a
+      project's drawer, add a run of tasks in quick succession that all
+      default to Someday unless told otherwise (still honoring the usual
+      `today`/`tomorrow`/`next week` overrides) — useful for brain-dumping
+      everything for a project at once rather than one quick-add entry at a
+      time. Raised 2026-07-31; not being built yet.
 
 ## Later — features worth considering (researched 2026-07-30)
 
@@ -92,3 +110,8 @@ building.
       address the underlying "Home - Finance" naming-as-hierarchy workaround
       (the nested sub-areas idea above still stands) — it only fixes typos
       and outdated names, not the lack of real sub-structure.
+- [x] Delete an Area, Project, or Task, each behind a Yes/No confirmation
+      that states the specific consequence (project/task counts affected).
+      Deleting an Area unassigns its Projects; deleting a Project unlinks
+      its Tasks. Neither cascades further — Tasks and Projects are never
+      deleted just because their parent was.

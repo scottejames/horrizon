@@ -18,6 +18,9 @@ interface TaskStoreValue {
   addTask: (input: AddTaskInput) => void;
   toggleDone: (id: string) => void;
   updateDescription: (id: string, description: string) => void;
+  deleteTask: (id: string) => void;
+  /** Unlinks every task from a project that's being deleted; the tasks themselves are untouched. */
+  unlinkTasksFromProject: (projectId: string) => void;
   /**
    * Moves a task to another horizon. Coming from `someday` this is a
    * one-way "Schedule" action (state becomes `open`); from anywhere else
@@ -101,6 +104,21 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
     client.models.Task.update({ id, description }).catch(console.error);
   }
 
+  function deleteTask(id: string) {
+    setTasks((prev) => prev.filter((task) => task.id !== id));
+    client.models.Task.delete({ id }).catch(console.error);
+  }
+
+  function unlinkTasksFromProject(projectId: string) {
+    const affected = tasks.filter((task) => task.projectId === projectId);
+    setTasks((prev) =>
+      prev.map((task) => (task.projectId === projectId ? { ...task, projectId: undefined } : task)),
+    );
+    affected.forEach((task) => {
+      client.models.Task.update({ id: task.id, projectId: null }).catch(console.error);
+    });
+  }
+
   function moveTask(id: string, target: Horizon) {
     const current = tasks.find((task) => task.id === id);
     if (!current) return;
@@ -123,7 +141,17 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
 
   return (
     <TaskStoreContext.Provider
-      value={{ tasks, tasksByHorizon, tasksByProject, addTask, toggleDone, updateDescription, moveTask }}
+      value={{
+        tasks,
+        tasksByHorizon,
+        tasksByProject,
+        addTask,
+        toggleDone,
+        updateDescription,
+        deleteTask,
+        unlinkTasksFromProject,
+        moveTask,
+      }}
     >
       {children}
     </TaskStoreContext.Provider>

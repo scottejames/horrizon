@@ -14,6 +14,10 @@ interface ProjectStoreValue {
   moveProjectToArea: (projectId: string, areaId: string | undefined) => void;
   renameProject: (id: string, name: string) => void;
   renameArea: (id: string, name: string) => void;
+  /** Deletes only the project record — unlinking its tasks is a separate, composed step (see TaskStoreContext.unlinkTasksFromProject). */
+  deleteProject: (id: string) => void;
+  /** Deletes the area and unassigns (not deletes) any projects that were in it. */
+  deleteArea: (id: string) => void;
 }
 
 const ProjectStoreContext = createContext<ProjectStoreValue | null>(null);
@@ -97,6 +101,23 @@ export function ProjectStoreProvider({ children }: { children: ReactNode }) {
     client.models.AreaOfResponsibility.update({ id, name }).catch(console.error);
   }
 
+  function deleteProject(id: string) {
+    setProjects((prev) => prev.filter((project) => project.id !== id));
+    client.models.Project.delete({ id }).catch(console.error);
+  }
+
+  function deleteArea(id: string) {
+    const affectedProjects = projects.filter((project) => project.areaId === id);
+    setAreas((prev) => prev.filter((area) => area.id !== id));
+    setProjects((prev) =>
+      prev.map((project) => (project.areaId === id ? { ...project, areaId: undefined } : project)),
+    );
+    client.models.AreaOfResponsibility.delete({ id }).catch(console.error);
+    affectedProjects.forEach((project) => {
+      client.models.Project.update({ id: project.id, areaId: null }).catch(console.error);
+    });
+  }
+
   return (
     <ProjectStoreContext.Provider
       value={{
@@ -108,6 +129,8 @@ export function ProjectStoreProvider({ children }: { children: ReactNode }) {
         moveProjectToArea,
         renameProject,
         renameArea,
+        deleteProject,
+        deleteArea,
       }}
     >
       {children}

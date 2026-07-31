@@ -4,6 +4,7 @@ import { Amplify } from "aws-amplify";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import outputs from "../amplify_outputs.json";
+import { ConfirmProvider } from "./context/ConfirmContext";
 import { ProjectStoreProvider } from "./context/ProjectStoreContext";
 import { TaskStoreProvider } from "./context/TaskStoreContext";
 import App from "./App";
@@ -20,7 +21,9 @@ createRoot(document.getElementById("root")!).render(
     <Authenticator>
       <ProjectStoreProvider>
         <TaskStoreProvider>
-          <App />
+          <ConfirmProvider>
+            <App />
+          </ConfirmProvider>
         </TaskStoreProvider>
       </ProjectStoreProvider>
     </Authenticator>

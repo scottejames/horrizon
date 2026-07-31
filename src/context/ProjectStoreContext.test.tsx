@@ -3,11 +3,20 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ProjectStoreProvider, useProjectStore } from "./ProjectStoreContext";
 
-const { areaCreateMock, areaUpdateMock, projectCreateMock, projectUpdateMock } = vi.hoisted(() => ({
+const {
+  areaCreateMock,
+  areaUpdateMock,
+  areaDeleteMock,
+  projectCreateMock,
+  projectUpdateMock,
+  projectDeleteMock,
+} = vi.hoisted(() => ({
   areaCreateMock: vi.fn().mockResolvedValue({}),
   areaUpdateMock: vi.fn().mockResolvedValue({}),
+  areaDeleteMock: vi.fn().mockResolvedValue({}),
   projectCreateMock: vi.fn().mockResolvedValue({}),
   projectUpdateMock: vi.fn().mockResolvedValue({}),
+  projectDeleteMock: vi.fn().mockResolvedValue({}),
 }));
 
 vi.mock("../lib/dataClient", () => ({
@@ -22,6 +31,7 @@ vi.mock("../lib/dataClient", () => ({
         }),
         create: areaCreateMock,
         update: areaUpdateMock,
+        delete: areaDeleteMock,
       },
       Project: {
         observeQuery: () => ({
@@ -32,14 +42,24 @@ vi.mock("../lib/dataClient", () => ({
         }),
         create: projectCreateMock,
         update: projectUpdateMock,
+        delete: projectDeleteMock,
       },
     },
   },
 }));
 
 function TestHarness() {
-  const { areas, projects, addArea, addProject, moveProjectToArea, renameProject, renameArea } =
-    useProjectStore();
+  const {
+    areas,
+    projects,
+    addArea,
+    addProject,
+    moveProjectToArea,
+    renameProject,
+    renameArea,
+    deleteProject,
+    deleteArea,
+  } = useProjectStore();
   const home = areas.find((area) => area.name === "Home");
   const unassigned = projects.filter((project) => !project.areaId);
   const inHome = home ? projects.filter((project) => project.areaId === home.id) : [];
@@ -49,7 +69,10 @@ function TestHarness() {
       <button onClick={() => addArea("Home", "personal")}>add area</button>
       <button onClick={() => addProject("Kitchen Remodel", "personal")}>add project</button>
       {home && (
-        <button onClick={() => renameArea(home.id, "Household")}>rename area</button>
+        <>
+          <button onClick={() => renameArea(home.id, "Household")}>rename area</button>
+          <button onClick={() => deleteArea(home.id)}>delete area</button>
+        </>
       )}
       <ul aria-label="areas">{areas.map((area) => <li key={area.id}>{area.name}</li>)}</ul>
       <ul aria-label="unassigned">
@@ -64,6 +87,7 @@ function TestHarness() {
             <button onClick={() => renameProject(project.id, "Kitchen Remodel Phase 2")}>
               rename {project.id}
             </button>
+            <button onClick={() => deleteProject(project.id)}>delete {project.id}</button>
           </li>
         ))}
       </ul>
@@ -80,8 +104,10 @@ describe("ProjectStoreContext", () => {
   beforeEach(() => {
     areaCreateMock.mockClear();
     areaUpdateMock.mockClear();
+    areaDeleteMock.mockClear();
     projectCreateMock.mockClear();
     projectUpdateMock.mockClear();
+    projectDeleteMock.mockClear();
   });
 
   it("throws when used outside a provider", () => {
@@ -168,5 +194,44 @@ describe("ProjectStoreContext", () => {
     expect(await screen.findByText("Household")).toBeInTheDocument();
     expect(screen.getByRole("list", { name: "areas" })).not.toHaveTextContent("Home");
     expect(areaUpdateMock).toHaveBeenCalledWith(expect.objectContaining({ name: "Household" }));
+  });
+
+  it("deletes a project optimistically and fires the network delete", async () => {
+    const user = userEvent.setup();
+    render(
+      <ProjectStoreProvider>
+        <TestHarness />
+      </ProjectStoreProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "add project" }));
+    expect(await screen.findByText("Kitchen Remodel")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^delete / }));
+
+    expect(screen.queryByText("Kitchen Remodel")).not.toBeInTheDocument();
+    expect(projectDeleteMock).toHaveBeenCalledWith(expect.objectContaining({ id: expect.any(String) }));
+  });
+
+  it("deletes an area and moves its projects to Unassigned, leaving them otherwise alone", async () => {
+    const user = userEvent.setup();
+    render(
+      <ProjectStoreProvider>
+        <TestHarness />
+      </ProjectStoreProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "add area" }));
+    await user.click(screen.getByRole("button", { name: "add project" }));
+    const moveButton = await screen.findByRole("button", { name: /^move .* to Home/ });
+    await user.click(moveButton);
+    expect(screen.getByRole("list", { name: "home-area" })).toHaveTextContent("Kitchen Remodel");
+
+    await user.click(screen.getByRole("button", { name: "delete area" }));
+
+    expect(screen.getByRole("list", { name: "areas" })).not.toHaveTextContent("Home");
+    expect(screen.getByRole("list", { name: "unassigned" })).toHaveTextContent("Kitchen Remodel");
+    expect(areaDeleteMock).toHaveBeenCalledWith(expect.objectContaining({ id: expect.any(String) }));
+    expect(projectUpdateMock).toHaveBeenCalledWith(expect.objectContaining({ areaId: null }));
   });
 });

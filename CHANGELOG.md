@@ -4,6 +4,27 @@ Notable changes to Horizon, newest first. See
 `.claude/skills/update-project-artifacts/SKILL.md` for how this file is
 kept current.
 
+## 2026-07-31
+
+### Added
+
+- Delete for any Task, Project, or Area, each behind a single global
+  Yes/No confirmation dialog (`ConfirmContext`/`useConfirm()`) that states
+  the specific consequence — "N projects will move to Unassigned," "N
+  tasks will be unlinked" — computed from the actual count at delete time,
+  not a generic "are you sure?". Yes is the default: autofocused, and
+  Enter confirms regardless of which element has focus. Deletion cascades
+  sideways only, never downward — deleting an Area unassigns (doesn't
+  delete) its Projects; deleting a Project unlinks (doesn't delete) its
+  Tasks.
+- `TODO.md`: three more raised-but-deferred requests (editable task
+  priority, project rename without opening the drawer, rapid multi-task
+  capture scoped to a project) and the sort/filter-tasks gap.
+
+### Changed
+
+- `TODO.md`'s "Delete" and "sidebar heading wrap" items moved to Shipped.
+
 ## 2026-07-30
 
 ### Added

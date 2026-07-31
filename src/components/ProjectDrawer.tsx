@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useConfirm } from "../context/ConfirmContext";
 import { useProjectStore } from "../context/ProjectStoreContext";
 import { useTaskStore } from "../context/TaskStoreContext";
 import { useInlineRename } from "../hooks/useInlineRename";
@@ -12,7 +13,9 @@ interface ProjectDrawerProps {
 
 interface ProjectTitleProps {
   project: Project;
+  linkedTaskCount: number;
   onRename: (name: string) => void;
+  onDelete: () => void;
 }
 
 /**
@@ -22,9 +25,10 @@ interface ProjectTitleProps {
  * drawer itself is one long-lived instance reused for whichever project is
  * open.
  */
-function ProjectTitle({ project, onRename }: ProjectTitleProps) {
+function ProjectTitle({ project, linkedTaskCount, onRename, onDelete }: ProjectTitleProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const rename = useInlineRename(project.name, onRename, inputRef);
+  const requestConfirm = useConfirm();
 
   if (rename.isEditing) {
     return (
@@ -39,6 +43,14 @@ function ProjectTitle({ project, onRename }: ProjectTitleProps) {
     );
   }
 
+  function handleDelete() {
+    const message =
+      linkedTaskCount > 0
+        ? `Delete "${project.name}"? ${linkedTaskCount} task${linkedTaskCount === 1 ? "" : "s"} will be unlinked from this project, but otherwise left alone.`
+        : `Delete "${project.name}"? There's nothing linked to it.`;
+    requestConfirm(message, onDelete);
+  }
+
   return (
     <div className="drawer-title-row">
       <h2 id="drawerTitle">{project.name}</h2>
@@ -50,13 +62,21 @@ function ProjectTitle({ project, onRename }: ProjectTitleProps) {
       >
         ✎
       </button>
+      <button
+        type="button"
+        className="delete-btn"
+        aria-label={`Delete project: ${project.name}`}
+        onClick={handleDelete}
+      >
+        🗑
+      </button>
     </div>
   );
 }
 
 export function ProjectDrawer({ projectId, onClose }: ProjectDrawerProps) {
-  const { projects, areas, moveProjectToArea, renameProject } = useProjectStore();
-  const { tasksByProject } = useTaskStore();
+  const { projects, areas, moveProjectToArea, renameProject, deleteProject } = useProjectStore();
+  const { tasksByProject, unlinkTasksFromProject } = useTaskStore();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const moveDetailsRef = useRef<HTMLDetailsElement>(null);
 
@@ -91,6 +111,13 @@ export function ProjectDrawer({ projectId, onClose }: ProjectDrawerProps) {
     if (moveDetailsRef.current) moveDetailsRef.current.open = false;
   }
 
+  function handleDeleteProject() {
+    if (!project) return;
+    unlinkTasksFromProject(project.id);
+    deleteProject(project.id);
+    onClose();
+  }
+
   return (
     <>
       <div
@@ -121,7 +148,9 @@ export function ProjectDrawer({ projectId, onClose }: ProjectDrawerProps) {
               <ProjectTitle
                 key={project.id}
                 project={project}
+                linkedTaskCount={linkedTasks.length}
                 onRename={(name) => renameProject(project.id, name)}
+                onDelete={handleDeleteProject}
               />
               <details className="project-move drawer-move" ref={moveDetailsRef}>
                 <summary>{area ? area.name : "No area"} <span aria-hidden="true">▾</span></summary>

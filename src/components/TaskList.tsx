@@ -12,7 +12,7 @@ interface TaskListProps {
 }
 
 export function TaskList({ horizon, commitment, onOpenProject, onMoved }: TaskListProps) {
-  const { tasksByHorizon, toggleDone, updateDescription, moveTask } = useTaskStore();
+  const { tasksByHorizon, toggleDone, updateDescription, deleteTask, moveTask } = useTaskStore();
   const { projects } = useProjectStore();
   const tasks = tasksByHorizon(horizon, commitment);
 
@@ -37,6 +37,7 @@ export function TaskList({ horizon, commitment, onOpenProject, onMoved }: TaskLi
               onToggleDone={() => toggleDone(task.id)}
               onMove={(target) => handleMove(task, target)}
               onRename={(description) => updateDescription(task.id, description)}
+              onDelete={() => deleteTask(task.id)}
               onOpenProject={onOpenProject}
             />
           ))}

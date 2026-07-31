@@ -3,9 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TaskStoreProvider, useTaskStore } from "./TaskStoreContext";
 
-const { createMock, updateMock } = vi.hoisted(() => ({
+const { createMock, updateMock, deleteMock } = vi.hoisted(() => ({
   createMock: vi.fn().mockResolvedValue({}),
   updateMock: vi.fn().mockResolvedValue({}),
+  deleteMock: vi.fn().mockResolvedValue({}),
 }));
 
 vi.mock("../lib/dataClient", () => ({
@@ -20,13 +21,15 @@ vi.mock("../lib/dataClient", () => ({
         }),
         create: createMock,
         update: updateMock,
+        delete: deleteMock,
       },
     },
   },
 }));
 
 function TestHarness() {
-  const { tasksByHorizon, addTask, moveTask, updateDescription } = useTaskStore();
+  const { tasksByHorizon, addTask, moveTask, updateDescription, deleteTask, unlinkTasksFromProject } =
+    useTaskStore();
   const today = tasksByHorizon("today", "personal");
   const tomorrow = tasksByHorizon("tomorrow", "personal");
 
@@ -44,14 +47,30 @@ function TestHarness() {
       >
         add task
       </button>
+      <button
+        onClick={() =>
+          addTask({
+            description: "Pick up paint",
+            priority: "med",
+            horizon: "today",
+            commitment: "personal",
+            projectId: "proj-1",
+          })
+        }
+      >
+        add linked task
+      </button>
+      <button onClick={() => unlinkTasksFromProject("proj-1")}>unlink proj-1</button>
       <ul aria-label="today">
         {today.map((task) => (
           <li key={task.id}>
             {task.description}
+            <span data-testid={`project-of-${task.id}`}>{task.projectId ?? "none"}</span>
             <button onClick={() => moveTask(task.id, "tomorrow")}>defer {task.id}</button>
             <button onClick={() => updateDescription(task.id, "Buy stamps and envelopes")}>
               rename {task.id}
             </button>
+            <button onClick={() => deleteTask(task.id)}>delete {task.id}</button>
           </li>
         ))}
       </ul>
@@ -71,6 +90,7 @@ describe("TaskStoreContext", () => {
   beforeEach(() => {
     createMock.mockClear();
     updateMock.mockClear();
+    deleteMock.mockClear();
   });
 
   it("throws when used outside a provider", () => {
@@ -169,6 +189,44 @@ describe("TaskStoreContext", () => {
     expect(updateMock).toHaveBeenCalledWith(
       expect.objectContaining({ description: "Buy stamps and envelopes" }),
     );
+  });
+
+  it("deletes a task optimistically and fires the network delete", async () => {
+    const user = userEvent.setup();
+    render(
+      <TaskStoreProvider>
+        <TestHarness />
+      </TaskStoreProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "add task" }));
+    expect(await screen.findByText("Buy stamps")).toBeInTheDocument();
+
+    const deleteButton = screen.getByRole("button", { name: /^delete / });
+    await user.click(deleteButton);
+
+    expect(screen.queryByText("Buy stamps")).not.toBeInTheDocument();
+    expect(deleteMock).toHaveBeenCalledWith(expect.objectContaining({ id: expect.any(String) }));
+  });
+
+  it("unlinks tasks from a deleted project without otherwise touching them", async () => {
+    const user = userEvent.setup();
+    render(
+      <TaskStoreProvider>
+        <TestHarness />
+      </TaskStoreProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "add linked task" }));
+    const row = (await screen.findByText("Pick up paint")).closest("li")!;
+    expect(row.querySelector('[data-testid^="project-of-"]')).toHaveTextContent("proj-1");
+
+    await user.click(screen.getByRole("button", { name: "unlink proj-1" }));
+
+    expect(screen.getByText("Pick up paint")).toBeInTheDocument();
+    const updatedRow = screen.getByText("Pick up paint").closest("li")!;
+    expect(updatedRow.querySelector('[data-testid^="project-of-"]')).toHaveTextContent("none");
+    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ projectId: null }));
   });
 
   it("moves a task to another horizon and tags it as deferred from its origin", async () => {

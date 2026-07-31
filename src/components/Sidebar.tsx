@@ -12,7 +12,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeCommitment, onOpenProject, onOpenSomeday }: SidebarProps) {
-  const { areas, projects, addArea, addProject, moveProjectToArea, renameArea } = useProjectStore();
+  const { areas, projects, addArea, addProject, moveProjectToArea, renameArea, deleteArea } =
+    useProjectStore();
   const { tasks } = useTaskStore();
   const [addingArea, setAddingArea] = useState(false);
   const [addingProject, setAddingProject] = useState(false);
@@ -70,6 +71,7 @@ export function Sidebar({ activeCommitment, onOpenProject, onOpenSomeday }: Side
           onOpenProject={onOpenProject}
           onMoveProject={moveProjectToArea}
           onRenameArea={renameArea}
+          onDeleteArea={deleteArea}
         />
       ))}
 
@@ -81,6 +83,7 @@ export function Sidebar({ activeCommitment, onOpenProject, onOpenSomeday }: Side
         onOpenProject={onOpenProject}
         onMoveProject={moveProjectToArea}
         onRenameArea={renameArea}
+        onDeleteArea={deleteArea}
       />
 
       {addingProject ? (

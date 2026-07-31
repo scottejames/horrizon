@@ -165,3 +165,41 @@ just similar-looking code (CODING_GUIDELINES.md's DRY-by-knowledge test).
   sections don't need this: they're already list items keyed by their own
   entity's id, so a different entity never reuses another's component
   instance in the first place.
+
+## Deletion cascades sideways, never downward, and is always confirmed
+
+Added 2026-07-31. Deleting an Area unassigns its Projects (they move to
+Unassigned); deleting a Project unlinks its Tasks (`projectId` cleared).
+Neither cascades further down to delete the child records themselves — a
+Task never disappears because a Project did, and a Project never disappears
+because an Area did. This was specified directly, not inferred, and it's
+the reason `deleteProject`/`deleteArea` live in `ProjectStoreContext` while
+the *unlinking of tasks* is a separate call
+(`TaskStoreContext.unlinkTasksFromProject`) composed at the component that
+triggers the delete (`ProjectDrawer`), not something `ProjectStoreContext`
+reaches across into `TaskStoreContext` to do itself — contexts don't call
+into each other; components compose them (CODING_GUIDELINES.md #4).
+
+- **Every deletion is confirmed with a message that states the specific
+  consequence**, not a generic "are you sure?" — "3 projects will move to
+  Unassigned," "2 tasks will be unlinked," computed from the actual count
+  at delete time, falling back to "there's nothing linked to it" when the
+  count is zero. Explaining the blast radius is the point; a generic
+  confirmation would be no better than not asking.
+- **Yes really is the default**, on purpose, against the usual "make Cancel
+  the safe default for destructive actions" convention — this was an
+  explicit instruction: Yes is autofocused, and Enter confirms regardless
+  of which element in the dialog has focus. Don't "fix" this toward the
+  more common pattern later without checking first; it was a deliberate
+  choice for this tool, not an oversight.
+- **One global `ConfirmProvider`/`useConfirm()`**, not a dialog owned by
+  each delete button. The alternative (each of Task/Project/Area owning its
+  own confirm modal markup) is the same duplication `useInlineRename` was
+  built to avoid, for the same reason — genuinely one interaction, reused.
+- **Danger red is a semantic exception to "color is spent on time-horizon
+  only."** `--danger` exists solely for the confirm dialog's Yes button and
+  the delete icon's hover state — it's a severity signal, not a fourth
+  member of the categorical horizon scale, the same distinction the
+  frontend design guidance draws between semantic (good/warning/critical)
+  color and a brand's categorical accent. Don't reach for `--danger`
+  outside an actual destructive-action context.

@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { useConfirm } from "../context/ConfirmContext";
 import { useInlineRename } from "../hooks/useInlineRename";
 import { HORIZON_LABEL, HORIZON_ORDER } from "../lib/horizon";
 import type { Horizon, Project, Task } from "../types";
@@ -9,13 +10,23 @@ interface TaskRowProps {
   onToggleDone: () => void;
   onMove: (target: Horizon) => void;
   onRename: (description: string) => void;
+  onDelete: () => void;
   onOpenProject: (projectId: string) => void;
 }
 
-export function TaskRow({ task, project, onToggleDone, onMove, onRename, onOpenProject }: TaskRowProps) {
+export function TaskRow({
+  task,
+  project,
+  onToggleDone,
+  onMove,
+  onRename,
+  onDelete,
+  onOpenProject,
+}: TaskRowProps) {
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
   const rename = useInlineRename(task.description, onRename, renameInputRef);
+  const requestConfirm = useConfirm();
   const isSomeday = task.horizon === "someday";
   const targets = isSomeday
     ? (["today", "tomorrow", "week"] as Horizon[])
@@ -24,6 +35,10 @@ export function TaskRow({ task, project, onToggleDone, onMove, onRename, onOpenP
   function handleMove(target: Horizon) {
     onMove(target);
     if (detailsRef.current) detailsRef.current.open = false;
+  }
+
+  function handleDelete() {
+    requestConfirm(`Delete "${task.description}"? This can't be undone.`, onDelete);
   }
 
   return (
@@ -59,6 +74,14 @@ export function TaskRow({ task, project, onToggleDone, onMove, onRename, onOpenP
             onClick={rename.startEditing}
           >
             ✎
+          </button>
+          <button
+            type="button"
+            className="delete-btn"
+            aria-label={`Delete task: ${task.description}`}
+            onClick={handleDelete}
+          >
+            🗑
           </button>
         </>
       )}

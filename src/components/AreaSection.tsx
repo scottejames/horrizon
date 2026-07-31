@@ -1,10 +1,11 @@
 import { useRef, useState, type DragEvent } from "react";
+import { useConfirm } from "../context/ConfirmContext";
 import { useInlineRename } from "../hooks/useInlineRename";
 import type { Project } from "../types";
 import { ProjectTreeRow } from "./ProjectTreeRow";
 
 interface AreaSectionProps {
-  /** `undefined` marks the always-present "Unassigned" bucket — not renameable. */
+  /** `undefined` marks the always-present "Unassigned" bucket — not renameable or deletable. */
   areaId: string | undefined;
   title: string;
   projects: Project[];
@@ -12,6 +13,7 @@ interface AreaSectionProps {
   onOpenProject: (projectId: string) => void;
   onMoveProject: (projectId: string, areaId: string | undefined) => void;
   onRenameArea: (areaId: string, name: string) => void;
+  onDeleteArea: (areaId: string) => void;
 }
 
 /**
@@ -28,6 +30,7 @@ export function AreaSection({
   onOpenProject,
   onMoveProject,
   onRenameArea,
+  onDeleteArea,
 }: AreaSectionProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -39,6 +42,16 @@ export function AreaSection({
     },
     renameInputRef,
   );
+  const requestConfirm = useConfirm();
+
+  function handleDelete() {
+    if (!areaId) return;
+    const message =
+      projects.length > 0
+        ? `Delete "${title}"? ${projects.length} project${projects.length === 1 ? "" : "s"} will move to Unassigned. Tasks in them won't be affected.`
+        : `Delete "${title}"? There's nothing linked to it.`;
+    requestConfirm(message, () => onDeleteArea(areaId));
+  }
 
   function handleDragOver(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
@@ -89,14 +102,24 @@ export function AreaSection({
               <span className="project-count">{projects.length}</span>
             </button>
             {areaId && (
-              <button
-                type="button"
-                className="rename-btn"
-                aria-label={`Rename area: ${title}`}
-                onClick={rename.startEditing}
-              >
-                ✎
-              </button>
+              <>
+                <button
+                  type="button"
+                  className="rename-btn"
+                  aria-label={`Rename area: ${title}`}
+                  onClick={rename.startEditing}
+                >
+                  ✎
+                </button>
+                <button
+                  type="button"
+                  className="delete-btn"
+                  aria-label={`Delete area: ${title}`}
+                  onClick={handleDelete}
+                >
+                  🗑
+                </button>
+              </>
             )}
           </>
         )}
