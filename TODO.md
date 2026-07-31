@@ -37,6 +37,10 @@ Raised reviewing a real screenshot of the Areas of Responsibility tree
       idea below (OmniFocus's per-project review interval) — when this
       gets picked up, decide whether it's that general mechanism or
       something Someday-specific, rather than building both separately.
+      Also related to the completed-task purge/narrative feature (see
+      Shipped): that one already solves "don't lose the record of what
+      happened" for *done* tasks — this one is the mirror problem for
+      tasks that never got scheduled at all.
       Raised 2026-07-31.
       - The sidebar's "N in Someday" indicator (2026-07-31) currently uses
         the simplest possible stand-in rule for "needs review": it shows
@@ -94,6 +98,14 @@ building.
       each one rather than letting them silently roll forward.
 - [ ] **Habit tracker** — TickTick's recurring daily check-off items,
       distinct from one-off tasks (a streak, not a to-do).
+- [ ] **A real AI-generated project narrative**, replacing the
+      template-based one shipped 2026-07-31 (see Shipped). Would need a
+      Lambda + secret (the same shape as the `ai-assist` pattern
+      `CODING_GUIDELINES.md` references from an earlier project), called
+      with the batch of just-completed task descriptions, to write an
+      actual generated summary instead of a fixed sentence template. Bigger
+      lift than the feature justified for a first pass; revisit if the
+      template version feels too mechanical in practice.
 
 ## Infrastructure
 
@@ -137,3 +149,14 @@ building.
       reachability holds even where a row has no preceding focusable
       sibling (the project drawer's title) via a wider focus scope on
       `.project-drawer` itself. See design-principles.md.
+- [x] Completed tasks are purged 24h after completion; each project's
+      drawer keeps a running natural-language "Progress" narrative built
+      from what got purged, compressing to a single running-total sentence
+      once a day so it doesn't grow forever. Debug-only manual triggers
+      (Ctrl+Alt+Shift+D, `scottejames@gmail.com` only) simulate both steps
+      instantly for testing. See design-principles.md's "Completed tasks
+      fade into a project's narrative, then get purged" entry — including
+      two real limitations worth remembering: the narrative is
+      template-generated text, not a real AI summary (see the Later
+      section below), and the 24h cycle only runs while the app is open
+      (client-side interval, no scheduled backend job).

@@ -12,6 +12,8 @@ export interface Task {
   commitment: Commitment;
   deferredFrom?: Horizon;
   projectId?: string;
+  /** ISO datetime set when state becomes 'done'; cleared if un-done. Drives the 24h purge. */
+  completedAt?: string;
 }
 
 export interface Project {
@@ -20,6 +22,12 @@ export interface Project {
   name: string;
   commitment: Commitment;
   areaId?: string;
+  /** Rolling natural-language progress summary — see design/design-principles.md. */
+  narrative: string;
+  /** Cumulative count of tasks ever purged as completed, survives compression. */
+  completedTaskCount: number;
+  /** ISO datetime of the last narrative compression; drives the 24h compression cycle. */
+  narrativeCompressedAt?: string;
 }
 
 export interface AreaOfResponsibility {

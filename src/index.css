@@ -1182,6 +1182,61 @@ details.drawer-move[open] summary {
   color: var(--accent);
   border: none;
 }
+.drawer-section-title {
+  font-size: var(--fs-xxs);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-soft);
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+.drawer-narrative {
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.drawer-narrative p {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  margin: 0 0 6px;
+}
+.drawer-narrative p:last-child {
+  margin-bottom: 0;
+}
+.drawer-narrative-empty {
+  color: var(--ink-soft);
+  font-style: italic;
+}
+.drawer-debug {
+  margin-bottom: 18px;
+  padding: 12px;
+  border: 1px dashed var(--danger);
+  border-radius: 10px;
+  background: var(--danger-wash);
+}
+.drawer-debug .drawer-section-title {
+  color: var(--danger);
+}
+.drawer-debug-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.drawer-debug-actions button {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  color: var(--ink);
+}
+.drawer-debug-actions button:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
 .drawer-list {
   display: flex;
   flex-direction: column;

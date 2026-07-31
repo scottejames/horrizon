@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { client } from "../lib/dataClient";
 import { toCommitment, toHorizon, toPriority, toTaskState } from "../lib/guards";
 import type { Commitment, Horizon, Priority, Task } from "../types";
@@ -13,12 +13,16 @@ export interface AddTaskInput {
 
 interface TaskStoreValue {
   tasks: Task[];
+  /** True once the initial `observeQuery` sync has completed — see useNarrativeMaintenance. */
+  tasksReady: boolean;
   tasksByHorizon: (horizon: Horizon, commitment: Commitment) => Task[];
   tasksByProject: (projectId: string) => Task[];
   addTask: (input: AddTaskInput) => void;
   toggleDone: (id: string) => void;
   updateDescription: (id: string, description: string) => void;
   deleteTask: (id: string) => void;
+  /** Bulk delete, used by the narrative-maintenance purge. */
+  deleteTasks: (ids: string[]) => void;
   /** Unlinks every task from a project that's being deleted; the tasks themselves are untouched. */
   unlinkTasksFromProject: (projectId: string) => void;
   /**
@@ -41,10 +45,11 @@ function stateRank(state: Task["state"]): number {
 
 export function TaskStoreProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasksReady, setTasksReady] = useState(false);
 
   useEffect(() => {
     const sub = client.models.Task.observeQuery().subscribe({
-      next: ({ items }) =>
+      next: ({ items, isSynced }) => {
         setTasks(
           items.map((item) => ({
             id: item.id,
@@ -55,8 +60,11 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
             commitment: toCommitment(item.commitment),
             deferredFrom: item.deferredFrom ? toHorizon(item.deferredFrom) : undefined,
             projectId: item.projectId ?? undefined,
+            completedAt: item.completedAt ?? undefined,
           })),
-        ),
+        );
+        if (isSynced) setTasksReady(true);
+      },
     });
     return () => sub.unsubscribe();
   }, []);
@@ -95,8 +103,13 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
     const current = tasks.find((task) => task.id === id);
     if (!current) return;
     const nextState = current.state === "done" ? "open" : "done";
-    setTasks((prev) => prev.map((task) => (task.id === id ? { ...task, state: nextState } : task)));
-    client.models.Task.update({ id, state: nextState }).catch(console.error);
+    const completedAt = nextState === "done" ? new Date().toISOString() : undefined;
+    setTasks((prev) =>
+      prev.map((task) => (task.id === id ? { ...task, state: nextState, completedAt } : task)),
+    );
+    client.models.Task.update({ id, state: nextState, completedAt: completedAt ?? null }).catch(
+      console.error,
+    );
   }
 
   function updateDescription(id: string, description: string) {
@@ -108,6 +121,18 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
     setTasks((prev) => prev.filter((task) => task.id !== id));
     client.models.Task.delete({ id }).catch(console.error);
   }
+
+  // useCallback with stable (empty) deps: only closes over setTasks (stable by React's
+  // guarantee) and the module-level client, so its identity never needs to change. See
+  // the matching comment on appendProjectNarrative in ProjectStoreContext for why this
+  // stability matters to useNarrativeMaintenance's mount effect.
+  const deleteTasks = useCallback((ids: string[]) => {
+    const idSet = new Set(ids);
+    setTasks((prev) => prev.filter((task) => !idSet.has(task.id)));
+    ids.forEach((id) => {
+      client.models.Task.delete({ id }).catch(console.error);
+    });
+  }, []);
 
   function unlinkTasksFromProject(projectId: string) {
     const affected = tasks.filter((task) => task.projectId === projectId);
@@ -128,7 +153,9 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
 
     setTasks((prev) =>
       prev.map((task) =>
-        task.id === id ? { ...task, horizon: target, state: nextState, deferredFrom } : task,
+        task.id === id
+          ? { ...task, horizon: target, state: nextState, deferredFrom, completedAt: undefined }
+          : task,
       ),
     );
     client.models.Task.update({
@@ -136,6 +163,7 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
       horizon: target,
       state: nextState,
       deferredFrom: deferredFrom ?? null,
+      completedAt: null,
     }).catch(console.error);
   }
 
@@ -143,12 +171,14 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
     <TaskStoreContext.Provider
       value={{
         tasks,
+        tasksReady,
         tasksByHorizon,
         tasksByProject,
         addTask,
         toggleDone,
         updateDescription,
         deleteTask,
+        deleteTasks,
         unlinkTasksFromProject,
         moveTask,
       }}

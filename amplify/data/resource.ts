@@ -30,6 +30,7 @@ const schema = a.schema({
       commitment: a.string().required(), // 'personal' | 'work'
       deferredFrom: a.string(), // horizon this task was deferred from, set only while state === 'deferred'
       projectId: a.string(),
+      completedAt: a.datetime(), // set when state becomes 'done', cleared if un-done; drives the 24h purge
     })
     .authorization((allow) => [allow.owner()]),
 
@@ -39,6 +40,9 @@ const schema = a.schema({
       name: a.string().required(),
       commitment: a.string().required(), // 'personal' | 'work'
       areaId: a.string(),
+      narrative: a.string(), // rolling natural-language progress summary, see design-principles.md
+      completedTaskCount: a.integer(), // cumulative total, survives narrative compression and task purges
+      narrativeCompressedAt: a.datetime(),
     })
     .authorization((allow) => [allow.owner()]),
 

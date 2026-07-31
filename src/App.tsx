@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CaptureBar } from "./components/CaptureBar";
 import { CommitmentToggle } from "./components/CommitmentToggle";
 import { HorizonTabs } from "./components/HorizonTabs";
@@ -9,6 +9,7 @@ import { TaskList } from "./components/TaskList";
 import { Toast } from "./components/Toast";
 import { useTaskStore } from "./context/TaskStoreContext";
 import { useAuth } from "./hooks/useAuth";
+import { useNarrativeMaintenance } from "./hooks/useNarrativeMaintenance";
 import { HORIZON_LABEL, HORIZON_ORDER } from "./lib/horizon";
 import type { Commitment, Horizon } from "./types";
 
@@ -24,8 +25,26 @@ export default function App() {
   const [activeCommitment, setActiveCommitment] = useState<Commitment>("personal");
   const [openProjectId, setOpenProjectId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [debugMode, setDebugMode] = useState(false);
   const { tasks } = useTaskStore();
-  const { signOut } = useAuth();
+  const { signOut, isDebugEligible } = useAuth();
+  const narrativeMaintenance = useNarrativeMaintenance();
+
+  // Debug mode has to be explicitly entered even for the one eligible
+  // account (see design-principles.md) — Ctrl+Alt+Shift+D toggles it,
+  // deliberately avoiding Ctrl+Shift+D since Chrome already binds that to
+  // "bookmark all tabs".
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.ctrlKey && event.altKey && event.shiftKey && event.key.toLowerCase() === "d") {
+        if (!isDebugEligible) return;
+        event.preventDefault();
+        setDebugMode((value) => !value);
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isDebugEligible]);
 
   const counts = HORIZON_ORDER.reduce(
     (acc, horizon) => {
@@ -82,7 +101,12 @@ export default function App() {
         </main>
       </div>
 
-      <ProjectDrawer projectId={openProjectId} onClose={() => setOpenProjectId(null)} />
+      <ProjectDrawer
+        projectId={openProjectId}
+        onClose={() => setOpenProjectId(null)}
+        debugEnabled={debugMode && isDebugEligible}
+        narrativeMaintenance={narrativeMaintenance}
+      />
       <Toast message={toastMessage} onDone={() => setToastMessage(null)} />
     </div>
   );

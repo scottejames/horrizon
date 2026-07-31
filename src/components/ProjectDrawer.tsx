@@ -2,14 +2,19 @@ import { useEffect, useRef } from "react";
 import { useConfirm } from "../context/ConfirmContext";
 import { useProjectStore } from "../context/ProjectStoreContext";
 import { useTaskStore } from "../context/TaskStoreContext";
+import { useAuth } from "../hooks/useAuth";
 import { useDeleteProjectCascade } from "../hooks/useDeleteProjectCascade";
 import { useInlineRename } from "../hooks/useInlineRename";
+import type { useNarrativeMaintenance } from "../hooks/useNarrativeMaintenance";
 import { HORIZON_LABEL } from "../lib/horizon";
 import type { Project } from "../types";
 
 interface ProjectDrawerProps {
   projectId: string | null;
   onClose: () => void;
+  /** App.tsx has already checked isDebugEligible; re-checked here too rather than trusted blindly. */
+  debugEnabled: boolean;
+  narrativeMaintenance: ReturnType<typeof useNarrativeMaintenance>;
 }
 
 interface ProjectTitleProps {
@@ -75,10 +80,17 @@ function ProjectTitle({ project, linkedTaskCount, onRename, onDelete }: ProjectT
   );
 }
 
-export function ProjectDrawer({ projectId, onClose }: ProjectDrawerProps) {
+export function ProjectDrawer({
+  projectId,
+  onClose,
+  debugEnabled,
+  narrativeMaintenance,
+}: ProjectDrawerProps) {
   const { projects, areas, moveProjectToArea, renameProject } = useProjectStore();
   const { tasksByProject } = useTaskStore();
   const deleteProjectCascade = useDeleteProjectCascade();
+  const { isDebugEligible } = useAuth();
+  const showDebugControls = debugEnabled && isDebugEligible;
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const moveDetailsRef = useRef<HTMLDetailsElement>(null);
 
@@ -172,6 +184,35 @@ export function ProjectDrawer({ projectId, onClose }: ProjectDrawerProps) {
                 </div>
               </details>
             </div>
+            <div className="drawer-narrative">
+              <h3 className="drawer-section-title">Progress</h3>
+              {project.narrative ? (
+                project.narrative.split("\n").map((line, index) => <p key={index}>{line}</p>)
+              ) : (
+                <p className="drawer-narrative-empty">
+                  No progress recorded yet — this fills in as tasks in this project are completed.
+                </p>
+              )}
+            </div>
+            {showDebugControls && (
+              <div className="drawer-debug">
+                <h3 className="drawer-section-title">Debug</h3>
+                <div className="drawer-debug-actions">
+                  <button
+                    type="button"
+                    onClick={() => narrativeMaintenance.purgeStaleCompletedTasks(true, project.id)}
+                  >
+                    Remove completed tasks now
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => narrativeMaintenance.compressDueNarratives(true, project.id)}
+                  >
+                    Compress narrative (simulate end of day)
+                  </button>
+                </div>
+              </div>
+            )}
             <ul className="drawer-list">
               {linkedTasks.length === 0 ? (
                 <li className="drawer-empty">No todos linked to #{project.shortCode} yet.</li>

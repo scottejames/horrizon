@@ -259,3 +259,70 @@ current priority but is where this rule should be reconsidered once it is
 (e.g. age-based, or tied to an actual review cadence rather than mere
 presence). Don't read the current rule as settled the way the rest of this
 document's entries are.
+
+## Completed tasks fade into a project's narrative, then get purged
+
+Added 2026-07-31. A done task stays visible (struck through) same as
+always, but after 24 hours it's actually deleted — not archived, not
+hidden, gone — and if it belonged to a project, its description is folded
+into that project's narrative first so it isn't lost. The narrative itself
+compresses once a day so it doesn't grow without bound: all but the most
+recent entry collapses into a single running-total sentence
+(`compressNarrative` in `src/lib/narrative.ts`), while `completedTaskCount`
+on the Project keeps the true cumulative total alive across compressions
+even though the per-task detail behind it is gone.
+
+- **The narrative is template-generated, not a real AI summary.** "Natural
+  language" here means readable template sentences (`describeCompletedBatch`
+  building `"31 Jul: wrapped up \"X\" and \"Y\"."`), not an LLM call. A
+  real generated summary would need a new Lambda + secret (the same shape
+  as the `ai-assist` pattern this project's own `CODING_GUIDELINES.md`
+  references from elsewhere) — a bigger lift than this feature warranted
+  for a first pass. See `TODO.md` for that as a possible future upgrade,
+  not a compromise to quietly "fix" later without discussion.
+- **The 24-hour timers are client-side only.** There's no scheduled Lambda
+  or cron — `useNarrativeMaintenance` checks every 5 minutes while the app
+  is open, plus once as soon as the initial `Task`/`Project` data is
+  actually loaded (gated on Amplify's `isSynced` flag, not just "on
+  mount" — see below), and purges/compresses whatever is actually due at
+  that moment. If the app isn't open, nothing happens until it next is.
+  This is a real limitation, not just an implementation detail — if
+  reliable same-day purging ever matters, that needs an actual scheduled
+  backend job, not a tighter client-side interval.
+- **The automatic sweep deliberately does NOT re-run on every tasks/projects
+  change — only on load and the 5-minute interval.** An earlier version
+  re-triggered on every data change to make sure it caught the initial load;
+  that instead let two purge passes each act on a different partial view of
+  "what's a candidate" as `observeQuery` emissions streamed in, corrupting
+  the narrative. If a future change needs tighter reactivity, don't
+  reintroduce a `[tasks, projects]` dependency on the trigger effect —
+  find another way to detect "meaningfully new data," the way `tasksReady`/
+  `projectsReady` (from `isSynced`) do for the initial load.
+- **Two independent `Project.update` calls for the same project race with no
+  ordering guarantee.** `appendProjectNarrative` and
+  `compressProjectNarrative` each fire their own backend write; if both
+  happen close together for the same project (as the automatic sweep does
+  when a purge's new entry immediately makes compression due), whichever
+  request reaches DynamoDB last wins the `narrative` field, even if the
+  other's local state was already correct. The sweep now `await`s the
+  purge's writes before compressing. Same caution applies to any future
+  code that fires two writes to the same record close together — reads via
+  `projectsRef`/`getLatestProjects` fix a stale-read bug, but they don't fix
+  an out-of-order-write bug, which needs actual sequencing.
+- **Purging is global; the narrative is project-only.** Any completed task
+  24h old gets deleted, project-linked or not — but only project-linked
+  ones produce a narrative entry, since there's nowhere to put one
+  otherwise. Don't extend the narrative concept to unassigned tasks without
+  first deciding where that narrative would even live.
+- **Debug mode is a convenience gate, not a security boundary.** It's
+  scoped to one account (`scottejames@gmail.com`, checked via
+  `user.signInDetails.loginId`) and has to be explicitly entered even for
+  that account — off by default, toggled per-session with
+  Ctrl+Alt+Shift+D (not Ctrl+Shift+D, which Chrome already binds to
+  "bookmark all tabs"). But every debug action only ever operates on that
+  signed-in user's own owner-scoped data regardless — the gate exists so a
+  different signed-in user never even sees testing controls in their own
+  UI, not because the underlying actions would be unsafe for them to run
+  otherwise. Checked twice on purpose (once in `App.tsx` before the prop is
+  even passed down, again inside `ProjectDrawer` itself) — don't remove
+  either check as "redundant."

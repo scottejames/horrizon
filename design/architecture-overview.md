@@ -39,6 +39,17 @@ header's Personal/Work toggle. See `design-principles.md`'s "Personal/Work
 is a second, independent filter" entry for why it's independent rather than
 derived, and how the frontend still defaults it sensibly at creation time.
 
+`Task.completedAt` (`AWSDateTime`, added 2026-07-31) is set when a task's
+state becomes `'done'` and cleared if it's un-done or moved to another
+horizon — it drives the 24-hour purge of completed tasks. `Project.narrative`,
+`Project.completedTaskCount`, and `Project.narrativeCompressedAt` (same
+date) back the per-project progress narrative built from those purged
+tasks' descriptions. See `design-principles.md`'s "Completed tasks fade
+into a project's narrative, then get purged" entry for the full behavior —
+notably that the narrative is template-generated text, not a real AI
+summary, and that the 24-hour cycle is a client-side periodic check, not a
+scheduled backend job.
+
 `AreaOfResponsibility` was renamed from `Program` on 2026-07-30 (see
 `design-principles.md`'s "Programs are Areas of Responsibility" entry) — a
 genuine schema/table rename, not just a frontend label change.

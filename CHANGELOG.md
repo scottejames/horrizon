@@ -32,6 +32,21 @@ kept current.
   at rest too, same as the sidebar. Keyboard reachability verified even
   where a row has no preceding focusable sibling to hand focus off from
   (the drawer title) — see `design-principles.md`.
+- The sidebar's "N in Someday" footer box now only renders once there's
+  at least one Someday task — "0 in Someday" was permanent clutter that
+  told the reader nothing. The trigger rule (any Someday task at all) is
+  a placeholder; see the new "real review mechanism" TODO item below.
+- Completed tasks are purged 24 hours after completion (not just marked —
+  actually deleted), and each project's drawer keeps a running
+  natural-language "Progress" narrative built from what got purged,
+  compressing to a single running-total sentence once a day. Debug-only
+  manual triggers (Ctrl+Alt+Shift+D, `scottejames@gmail.com` only)
+  simulate both steps instantly for testing without waiting 24 hours. The
+  narrative is template-generated text, not a real AI summary — see
+  `design-principles.md` and the new "real AI-generated narrative" TODO
+  item for the reasoning and the possible upgrade.
+- `TODO.md`: a real review mechanism for forgotten tasks (explicitly not a
+  priority yet), plus a possible future AI-generated narrative upgrade.
 
 ### Changed
 
@@ -45,6 +60,28 @@ kept current.
   "Move project reassignment out of the cramped sidebar tree row", above).
   Switched to `display: none` / `inline-block` so a hidden icon actually
   gives its space back.
+- Testing the completed-task purge/narrative feature above with two tasks
+  completed together surfaced three compounding race conditions, all now
+  fixed: (1) `appendProjectNarrative`/`compressProjectNarrative` read
+  `projects` from a stale render closure instead of the latest value, so a
+  second call before a re-render landed silently overwrote the first
+  instead of composing with it; (2) none of `ProjectStoreContext`'s or
+  `TaskStoreContext`'s functions were memoized, so their identity churned
+  on every render, which cascaded into the maintenance effect tearing down
+  and re-running far more often than the intended "once on load, then
+  every 5 minutes"; (3) `appendProjectNarrative` and
+  `compressProjectNarrative` each fire an independent `Project.update`
+  call, and with no ordering guarantee between two requests in flight for
+  the same project, the append's could complete on the server after the
+  compress's and silently revert the compression. Fixed via a
+  synchronously-updated ref for reads inside those two functions,
+  `useCallback` with stable deps on the functions the maintenance hook
+  depends on, gating the automatic sweep on Amplify's `isSynced` signal
+  instead of re-running on every data change, and awaiting the purge's
+  narrative writes before compressing. Re-verified end-to-end (two tasks
+  completed and purged together, a third completed later to trigger
+  compression) with the raw DynamoDB record checked directly, not just the
+  rendered UI.
 
 ## 2026-07-30
 
