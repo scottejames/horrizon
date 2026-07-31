@@ -20,13 +20,18 @@ kept current.
 - `TODO.md`: three more raised-but-deferred requests (editable task
   priority, project rename without opening the drawer, rapid multi-task
   capture scoped to a project) and the sort/filter-tasks gap.
-- **Experiment**: hover-reveal rename + delete icons on the sidebar's
-  project row, additive to the always-visible ones already in the project
-  drawer — not yet a settled pattern, see `design-principles.md`. Resolves
-  the "edit a project's name without opening its drawer first" request as
-  a side effect. Extracted `useDeleteProjectCascade()` so the drawer and
-  this row share one implementation of "unlink tasks, then delete the
-  project" instead of duplicating it.
+- Hover-reveal rename + delete icons on the sidebar's project row
+  (started as a same-day trial, additive to the project drawer's own
+  controls). Resolves the "edit a project's name without opening its
+  drawer first" request as a side effect. Extracted
+  `useDeleteProjectCascade()` so the drawer and this row share one
+  implementation of "unlink tasks, then delete the project" instead of
+  duplicating it.
+- Promoted hover-reveal to a settled, app-wide design principle: task
+  rows and the project drawer's title now hide their rename/delete icons
+  at rest too, same as the sidebar. Keyboard reachability verified even
+  where a row has no preceding focusable sibling to hand focus off from
+  (the drawer title) — see `design-principles.md`.
 
 ### Changed
 

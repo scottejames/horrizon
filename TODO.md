@@ -113,13 +113,11 @@ building.
 - [x] ~~Edit a project's name without opening its drawer first~~ — resolved
       as a side effect of the hover-reveal experiment below: rename now
       lives directly on the sidebar tree row too.
-- [x] **EXPERIMENT** (not yet a settled UI pattern): hover-reveal rename +
-      delete icons on the sidebar's project row, additive to the
-      always-visible ones already in the project drawer. Caught and fixed a
-      real bug while building it: hiding the icons with `opacity: 0` still
-      reserved their layout width, silently truncating the name at rest —
-      the exact bug these icons exist despite. Switched to `display: none`
-      / `inline-block` so a hidden icon gives its space back. If this reads
-      well in practice, extend it to TaskRow next; if hover-reveal turns
-      out to be annoying on touch/trackpad, revert to drawer-only rather
-      than tuning it further — see design-principles.md.
+- [x] Hover-reveal rename/delete icons rolled out to the whole app (settled
+      design principle, not just the sidebar trial it started as) — task
+      rows, the project drawer's title, the sidebar's area header, and the
+      sidebar's project row all hide their edit/delete icons until the
+      mouse (or keyboard focus) is on that specific item. Verified keyboard
+      reachability holds even where a row has no preceding focusable
+      sibling (the project drawer's title) via a wider focus scope on
+      `.project-drawer` itself. See design-principles.md.

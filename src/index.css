@@ -394,14 +394,29 @@ ul {
   color: var(--danger);
   background: var(--danger-wash);
 }
+/* Design goal (design-principles.md): edit/delete icons are only shown
+   while the mouse is on the item they act on — everywhere in the app, not
+   just the sidebar. display:none (not opacity) so a hidden icon gives its
+   width back rather than silently reserving space and truncating the
+   label at rest (the exact bug these icons exist despite).
+
+   Hover scope is always the item's own row/title. Focus scope is usually
+   the same row too, since each row already has an always-visible focusable
+   element ahead of the icons in tab order (a checkbox or toggle button),
+   which is what lets a keyboard user tab onto the row and have the icons
+   become reachable for the next Tab press. The one exception is the
+   project drawer's title: nothing focusable precedes it there, but the
+   drawer already autofocuses its close button on open, so scoping focus
+   (not hover) to the whole `.project-drawer` keeps the icons keyboard-
+   reachable without widening the *hover* trigger past the title itself. */
 .tree-area-header .rename-btn,
 .tree-area-header .delete-btn,
 .tree-project .rename-btn,
-.tree-project .delete-btn {
-  /* display:none (not opacity) so a hidden icon gives its width back to the
-     name column at rest — an opacity toggle still reserves the box, which
-     silently reintroduces the exact truncation bug these icons exist
-     despite (see design-principles.md). */
+.tree-project .delete-btn,
+.task .rename-btn,
+.task .delete-btn,
+.drawer-title-row .rename-btn,
+.drawer-title-row .delete-btn {
   display: none;
 }
 .tree-area:hover .tree-area-header .rename-btn,
@@ -411,7 +426,15 @@ ul {
 .tree-project:hover .rename-btn,
 .tree-project:hover .delete-btn,
 .tree-project:focus-within .rename-btn,
-.tree-project:focus-within .delete-btn {
+.tree-project:focus-within .delete-btn,
+.task:hover .rename-btn,
+.task:hover .delete-btn,
+.task:focus-within .rename-btn,
+.task:focus-within .delete-btn,
+.drawer-title-row:hover .rename-btn,
+.drawer-title-row:hover .delete-btn,
+.project-drawer:focus-within .rename-btn,
+.project-drawer:focus-within .delete-btn {
   display: inline-block;
 }
 .disclosure {
