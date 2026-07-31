@@ -9,12 +9,19 @@ export const HORIZON_LABEL: Record<Horizon, string> = {
   someday: "Someday",
 };
 
-/** Compact labels for the one-click reschedule buttons on a task row — see design-principles.md. */
+/**
+ * Compact labels for the one-click reschedule buttons on a task row — see
+ * design-principles.md. Today/Tomorrow/Week abbreviate down to letters
+ * that still visibly derive from the full word; Someday doesn't survive
+ * that the same way ("Sd" reads as a typo, not a word), so it stays
+ * spelled out. It only ever appears once per row (a task's own horizon is
+ * never one of its reschedule targets), so the extra width is cheap.
+ */
 export const HORIZON_SHORT_LABEL: Record<Horizon, string> = {
   today: "Tdy",
   tomorrow: "Tmrw",
   week: "Wk",
-  someday: "Sd",
+  someday: "Someday",
 };
 
 export const HORIZON_INTRO: Record<Horizon, string> = {

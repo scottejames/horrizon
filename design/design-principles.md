@@ -366,9 +366,14 @@ of a menu that has to be opened first. The colors reuse the same
 `--accent`/`--tomorrow`/`--week`/`--someday` tokens as the horizon tabs and
 `.horizon-dot`, not a new palette — so a task row's reschedule buttons read
 as "the same four horizons" the rest of the app already color-codes, not a
-new visual language to learn. Labels are abbreviated (`Tdy`/`Tmrw`/`Wk`/`Sd`
-— see `HORIZON_SHORT_LABEL` in `lib/horizon.ts`) to fit three buttons in the
+new visual language to learn. Labels are abbreviated (`Tdy`/`Tmrw`/`Wk` —
+see `HORIZON_SHORT_LABEL` in `lib/horizon.ts`) to fit three buttons in the
 same row that used to hold one dropdown button; the full word is still in
-each button's `title`/`aria-label` for anyone who needs it spelled out. If
-a future change adds a fifth horizon, revisit this — four buttons might
+each button's `title`/`aria-label` for anyone who needs it spelled out.
+Someday is the one exception, spelled out in full rather than abbreviated
+(feedback 2026-07-31: "Sd" read as a typo, not a word, unlike the other
+three which still visibly derive from their full word) — it costs little
+width since a task's own horizon is never one of its own reschedule
+targets, so "Someday" appears at most once per row. If a future change
+adds a fifth horizon, revisit this — four buttons might
 still fit, but don't let it grow unbounded before checking.
