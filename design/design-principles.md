@@ -43,6 +43,16 @@ should keep using separate verbs ("Defer" vs "Schedule", in each button's
 directions even though they're both "change this task's horizon" under the
 hood — the verb carries which direction the user is choosing.
 
+**Generalized 2026-10-08**: direction, not origin, decides which it is.
+Originally only a move *out of Someday* counted as Schedule, so pulling a
+task forward between dated horizons (Tomorrow → Today) tagged it "deferred
+from Tomorrow" and sank it below open tasks — confirmed as a bug, since
+bringing something forward is the opposite of procrastinating. Now any move
+to an earlier horizon is a Schedule (state `open`, `deferredFrom` cleared)
+and any move to a later one is a Defer — one rule, `isDeferral()` in
+`lib/horizon.ts`, shared by the store, the toast, and the button labels so
+they can't disagree.
+
 ## Project detail opens as a drawer, not a page
 
 Clicking a project's short code (in the sidebar or on a task's chip) slides in

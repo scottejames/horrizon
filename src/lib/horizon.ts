@@ -2,6 +2,15 @@ import type { Horizon } from "../types";
 
 export const HORIZON_ORDER: Horizon[] = ["today", "tomorrow", "week", "someday"];
 
+/**
+ * True when moving from `from` to `to` pushes a task later (a Defer).
+ * Moving earlier is a Schedule — pulling something forward isn't
+ * procrastinating, so it mustn't pick up a "deferred from" tag.
+ */
+export function isDeferral(from: Horizon, to: Horizon): boolean {
+  return HORIZON_ORDER.indexOf(to) > HORIZON_ORDER.indexOf(from);
+}
+
 export const HORIZON_LABEL: Record<Horizon, string> = {
   today: "Today",
   tomorrow: "Tomorrow",
@@ -26,7 +35,7 @@ export const HORIZON_SHORT_LABEL: Record<Horizon, string> = {
 
 export const HORIZON_INTRO: Record<Horizon, string> = {
   today: "Everything you're committing to today.",
-  tomorrow: "Waiting for tomorrow — nothing here moves until then.",
+  tomorrow: "Lined up for tomorrow. These don't move to Today on their own yet — bring them over when the day comes.",
   week: "On the radar for next week.",
   someday:
     "Parked with no date. Someday tasks never schedule themselves — review them and send one to Today, Tomorrow, or Next Week when it's time.",

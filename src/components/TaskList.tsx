@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useProjectStore } from "../context/ProjectStoreContext";
 import { useTaskStore } from "../context/TaskStoreContext";
-import { HORIZON_INTRO } from "../lib/horizon";
+import { HORIZON_INTRO, isDeferral } from "../lib/horizon";
 import { DEFAULT_TASK_FILTER, filterTasks, sortTasks } from "../lib/taskListView";
 import type { TaskListFilter, TaskSortMode } from "../lib/taskListView";
 import type { Commitment, Horizon, Task } from "../types";
@@ -12,7 +12,7 @@ interface TaskListProps {
   horizon: Horizon;
   commitment: Commitment;
   onOpenProject: (projectId: string) => void;
-  onMoved: (target: Horizon, wasSomeday: boolean) => void;
+  onMoved: (target: Horizon, deferred: boolean) => void;
 }
 
 export function TaskList({ horizon, commitment, onOpenProject, onMoved }: TaskListProps) {
@@ -34,9 +34,8 @@ export function TaskList({ horizon, commitment, onOpenProject, onMoved }: TaskLi
   );
 
   function handleMove(task: Task, target: Horizon) {
-    const wasSomeday = task.horizon === "someday";
     moveTask(task.id, target);
-    onMoved(target, wasSomeday);
+    onMoved(target, isDeferral(task.horizon, target));
   }
 
   return (

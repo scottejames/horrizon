@@ -230,8 +230,9 @@ ul {
   color: var(--ink);
   box-shadow: var(--shadow-sm);
 }
-.sign-out {
+.header-button {
   background: none;
+  text-decoration: none;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
   padding: 6px 12px;
@@ -240,7 +241,7 @@ ul {
   cursor: pointer;
   color: var(--ink-soft);
 }
-.sign-out:hover {
+.header-button:hover {
   color: var(--ink);
   border-color: var(--ink-soft);
 }

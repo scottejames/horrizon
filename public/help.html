@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#eceef0" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#14171a" media="(prefers-color-scheme: dark)" />
+    <title>Horizon Help</title>
+    <!--
+      Kept in step with the app by .claude/skills/update-project-artifacts.
+      A static page rather than part of the React bundle, so it can't import
+      src/index.css — the tokens below are a copy of its color/font tokens
+      (same trade-off as public/favicon.svg). Change both together.
+    -->
+    <style>
+      :root {
+        --ink: #1c2024;
+        --ink-soft: #5b6169;
+        --paper: #eceef0;
+        --surface: #ffffff;
+        --surface-2: #f5f6f7;
+        --border: rgba(28, 32, 36, 0.13);
+        --border-strong: rgba(28, 32, 36, 0.22);
+        --accent: #dd7a33;
+        --tomorrow: #3e8e82;
+        --week: #5b6fa8;
+        --someday: #8b7a94;
+        --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+        --font-body: "Seravek", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        --font-mono: "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, "Liberation Mono", monospace;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --ink: #eceef0;
+          --ink-soft: #9ba2ac;
+          --paper: #14171a;
+          --surface: #1b1f23;
+          --surface-2: #20252a;
+          --border: rgba(236, 238, 240, 0.13);
+          --border-strong: rgba(236, 238, 240, 0.24);
+          --accent: #f0924d;
+          --tomorrow: #55a79a;
+          --week: #7c8fcb;
+          --someday: #a594ac;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--font-body);
+        font-size: 0.9375rem;
+        line-height: 1.6;
+      }
+      .page {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 28px 16px 64px;
+      }
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      .back {
+        border: 1px solid var(--border-strong);
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--ink-soft);
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .back:hover { color: var(--ink); border-color: var(--ink-soft); }
+      h1, h2 { font-family: var(--font-display); font-weight: 600; line-height: 1.2; }
+      h1 { font-size: 2.375rem; margin: 0 0 6px; }
+      .lede { color: var(--ink-soft); margin: 0 0 24px; font-size: 1.0625rem; }
+      nav.toc {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-bottom: 8px;
+      }
+      nav.toc ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 28px; }
+      @media (max-width: 560px) { nav.toc ol { columns: 1; } }
+      nav.toc li { margin: 0 0 4px; }
+      nav.toc a { color: var(--ink); }
+      section {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 6px 20px 14px;
+        margin-top: 16px;
+      }
+      h2 { font-size: 1.375rem; margin: 16px 0 8px; }
+      h3 { font-size: 1rem; margin: 18px 0 4px; }
+      p, ul { margin: 8px 0; }
+      li { margin: 4px 0; }
+      a { color: inherit; text-underline-offset: 2px; }
+      code, kbd {
+        font-family: var(--font-mono);
+        font-size: 0.8125rem;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        padding: 1px 5px;
+        overflow-wrap: anywhere;
+      }
+      .table-wrap { overflow-x: auto; }
+      table { border-collapse: collapse; width: 100%; font-size: 0.875rem; }
+      th, td { text-align: left; padding: 7px 10px 7px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+      th { color: var(--ink-soft); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+      .horizons { list-style: none; padding: 0; }
+      .horizons li { display: flex; gap: 10px; align-items: baseline; }
+      .dot { flex: none; width: 10px; height: 10px; border-radius: 50%; display: inline-block; transform: translateY(1px); }
+      .d-today { background: var(--accent); }
+      .d-tomorrow { background: var(--tomorrow); }
+      .d-week { background: var(--week); }
+      .d-someday { background: var(--someday); }
+      .note {
+        border-left: 3px solid var(--border-strong);
+        padding: 2px 0 2px 12px;
+        color: var(--ink-soft);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="topbar">
+        <span></span>
+        <a class="back" href="/">← Back to Horizon</a>
+      </div>
+
+      <h1>Horizon help</h1>
+      <p class="lede">
+        Today's list, tomorrow's plan. Horizon sorts everything you mean to do by <em>when</em> you'll
+        do it, so the Today list stays short enough to actually finish.
+      </p>
+
+      <nav class="toc" aria-label="Contents">
+        <ol>
+          <li><a href="#horizons">The four horizons</a></li>
+          <li><a href="#adding">Adding tasks</a></li>
+          <li><a href="#working">Working your list</a></li>
+          <li><a href="#rescheduling">Rescheduling</a></li>
+          <li><a href="#someday">Someday</a></li>
+          <li><a href="#commitment">Personal and Work</a></li>
+          <li><a href="#projects">Areas and projects</a></li>
+          <li><a href="#completed">What happens to finished tasks</a></li>
+          <li><a href="#deleting">Renaming and deleting</a></li>
+          <li><a href="#install">Installing on your phone</a></li>
+        </ol>
+      </nav>
+
+      <section id="horizons">
+        <h2>The four horizons</h2>
+        <p>Every task sits on exactly one horizon, shown as a tab across the top of the list:</p>
+        <ul class="horizons">
+          <li><span class="dot d-today"></span><span><b>Today</b>: what you're committing to today.</span></li>
+          <li><span class="dot d-tomorrow"></span><span><b>Tomorrow</b>: lined up for tomorrow.</span></li>
+          <li><span class="dot d-week"></span><span><b>Next Week</b>: on the radar for next week.</span></li>
+          <li><span class="dot d-someday"></span><span><b>Someday</b>: parked, with no date at all.</span></li>
+        </ul>
+        <p>
+          Each horizon keeps its color everywhere in the app (tabs, buttons, dots), so you can tell
+          where a task belongs at a glance. Color is used for nothing else.
+        </p>
+        <p class="note">
+          Horizons don't roll over on their own yet. When tomorrow arrives, tasks on Tomorrow stay
+          there until you move them to Today yourself.
+        </p>
+      </section>
+
+      <section id="adding">
+        <h2>Adding tasks</h2>
+        <p>
+          Type into <b>Add to your list</b> and press <kbd>Enter</kbd>. One line can carry everything
+          about the task. Mix in any of the keywords below, in any order, and the preview under the box
+          shows how they'll be read before you add it.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Type</th><th>Sets</th><th>If you leave it out</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><code>today</code> <code>tomorrow</code> <code>next week</code> <code>someday</code></td>
+                <td>Horizon</td>
+                <td>Today</td>
+              </tr>
+              <tr>
+                <td><code>!high</code> <code>!med</code> <code>!low</code><br />(or <code>!h</code> <code>!m</code> <code>!l</code>)</td>
+                <td>Priority</td>
+                <td>Medium</td>
+              </tr>
+              <tr>
+                <td><code>#CODE</code></td>
+                <td>Project, by its short code</td>
+                <td>No project</td>
+              </tr>
+              <tr>
+                <td><code>@personal</code> <code>@work</code></td>
+                <td>Personal or Work</td>
+                <td>The project's setting, or else whichever tab you're on</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>For example, <code>Call tile supplier !high #KIT tomorrow @work</code> adds “Call tile supplier” to Tomorrow, high priority, in the KIT project, under Work.</p>
+        <p>
+          A <code>#CODE</code> you haven't used before is accepted rather than rejected: Horizon creates
+          a new project with that code and puts it in <b>Unassigned</b> for you to organise later.
+        </p>
+      </section>
+
+      <section id="working">
+        <h2>Working your list</h2>
+        <ul>
+          <li><b>Tick the checkbox</b> to mark a task done. It stays on the list, struck through, and sinks below the tasks still to do. Tick again to undo.</li>
+          <li><b>Priority</b> is the three-bar signal on each task: more filled bars means higher priority. Click it to change the priority.</li>
+          <li><b>Project chip</b>: click a task's <code>#CODE</code> to open that project.</li>
+          <li>
+            <b>Search, filter and sort</b> sit above the list. You can search descriptions, filter by
+            priority or project (including “No project”), and sort by Priority, Alphabetical or
+            Project. Whatever the sort, open tasks always come first, then deferred ones, then done
+            ones. These settings apply across all four tabs and reset when you reload.
+          </li>
+        </ul>
+      </section>
+
+      <section id="rescheduling">
+        <h2>Rescheduling</h2>
+        <p>
+          Each task row shows three colored buttons, one for each horizon the task isn't on
+          (<b>Tdy</b>, <b>Tmrw</b>, <b>Wk</b>, <b>Someday</b>). One click moves it there.
+        </p>
+        <ul>
+          <li>
+            <b>Moving later is a Defer.</b> The task picks up a small “↩ deferred from …” tag and
+            sorts below the open tasks on its new list. That's deliberate: if the same task keeps
+            sliding, you'll see it.
+          </li>
+          <li>
+            <b>Moving earlier is a Schedule.</b> Pulling a task forward (for example, Tomorrow to
+            Today, or anything out of Someday) clears any deferred tag. The task arrives as a normal
+            open task.
+          </li>
+        </ul>
+        <p>Hover over a button to see whether it will defer or schedule.</p>
+      </section>
+
+      <section id="someday">
+        <h2>Someday</h2>
+        <p>
+          Someday is for things with no date. Nothing ever moves a Someday task onto a dated list
+          automatically. It leaves Someday only when you schedule it yourself.
+        </p>
+        <p>
+          While any Someday tasks exist, the sidebar shows an <b>“N in Someday”</b> box; click its
+          <b>→</b> to jump to the Someday tab and review them. When Someday is empty, the box
+          disappears.
+        </p>
+      </section>
+
+      <section id="commitment">
+        <h2>Personal and Work</h2>
+        <p>
+          The <b>Personal / Work</b> switch in the header changes the whole app at once: the
+          sidebar, the tabs, the lists and the counts. Every task, project and area belongs to one
+          side or the other, independently. A task doesn't have to match its project.
+        </p>
+        <p>
+          You rarely need to set this by hand. New tasks follow the <code>@work</code> or
+          <code>@personal</code> you typed, then their project's setting, then the tab you're on. New
+          areas and projects follow the tab you're on.
+        </p>
+      </section>
+
+      <section id="projects">
+        <h2>Areas and projects</h2>
+        <h3>Areas of Responsibility</h3>
+        <p>
+          Areas are the standing parts of your life or work (Home, Health, Finances…), grouped by
+          head space rather than any formal structure. They appear in the sidebar as a tree that you
+          can expand and collapse. Horizon remembers which areas you left open.
+        </p>
+        <h3>Projects</h3>
+        <ul>
+          <li>Use the sidebar's <b>+</b> controls to add an area or a project. New projects land in <b>Unassigned</b>, and each one gets a short code (e.g. “Kitchen Remodel” becomes <code>KR</code>) for use with <code>#</code> in quick-add.</li>
+          <li><b>To file a project under an area</b>, drag its row onto the area. Or, on a phone or with the keyboard, open the project and use <b>Move to area</b>. Only areas on the same Personal/Work side are offered.</li>
+          <li><b>Click a project</b> (in the sidebar or on a task's chip) to open its panel. It slides in over your list without losing your place.</li>
+        </ul>
+        <h3>Inside a project</h3>
+        <ul>
+          <li>The panel lists every task linked to the project, across all horizons.</li>
+          <li>
+            Its own add box is for brain-dumping: it stays open after each add. Tasks added there go to
+            <b>Someday</b> unless you type a horizon. The main add box defaults to Today instead,
+            because it's for things you mean to do now.
+          </li>
+          <li>The <b>Progress</b> section is a running summary of what's been finished in the project (see below).</li>
+        </ul>
+      </section>
+
+      <section id="completed">
+        <h2>What happens to finished tasks</h2>
+        <p>
+          A done task stays visible for 24 hours, then it's deleted for good. If it belonged to a
+          project, a line recording it is added to that project's <b>Progress</b> summary first, so
+          the record isn't lost. Once a day the summary condenses older entries into a single running
+          total, so it stays short.
+        </p>
+        <p class="note">
+          This tidying only happens while Horizon is open. If you haven't opened it for a while, it
+          catches up the next time you do.
+        </p>
+      </section>
+
+      <section id="deleting">
+        <h2>Renaming and deleting</h2>
+        <p>
+          Hover over a task, project or area (or tab to it with the keyboard) to reveal its pencil
+          and delete icons.
+        </p>
+        <ul>
+          <li><b>Rename</b>: click the pencil, type, then press <kbd>Enter</kbd> or click away to save. Press <kbd>Escape</kbd> to cancel.</li>
+          <li>
+            <b>Delete</b> always asks first and tells you exactly what will happen, such as “3
+            projects will move to Unassigned.” <b>Yes</b> is the default, so pressing
+            <kbd>Enter</kbd> confirms.
+          </li>
+          <li>
+            Deleting never takes other things with it. Deleting an area moves its projects to
+            Unassigned. Deleting a project unlinks its tasks, which stay on your lists.
+          </li>
+        </ul>
+      </section>
+
+      <section id="install">
+        <h2>Installing on your phone</h2>
+        <p>Horizon can be installed like an app:</p>
+        <ul>
+          <li><b>iPhone / iPad</b>: in Safari, tap Share, then <b>Add to Home Screen</b>.</li>
+          <li><b>Android / Chrome</b>: open the browser menu and choose <b>Install app</b>.</li>
+        </ul>
+        <p>
+          The installed app updates itself when a new version is released. It still needs a
+          connection to load and save your tasks.
+        </p>
+        <p class="note">
+          Dragging projects between areas doesn't work on touch screens. Use <b>Move to area</b> in
+          the project's panel instead.
+        </p>
+      </section>
+    </div>
+  </body>
+</html>

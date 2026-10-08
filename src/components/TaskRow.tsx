@@ -1,8 +1,12 @@
 import { useRef } from "react";
 import { useConfirm } from "../context/ConfirmContext";
 import { useInlineRename } from "../hooks/useInlineRename";
-import { HORIZON_LABEL, HORIZON_ORDER, HORIZON_SHORT_LABEL } from "../lib/horizon";
+import { HORIZON_LABEL, HORIZON_ORDER, HORIZON_SHORT_LABEL, isDeferral } from "../lib/horizon";
 import type { Horizon, Priority, Project, Task } from "../types";
+
+function rescheduleLabel(from: Horizon, to: Horizon): string {
+  return `${isDeferral(from, to) ? "Defer to" : "Schedule for"} ${HORIZON_LABEL[to]}`;
+}
 
 interface TaskRowProps {
   task: Task;
@@ -127,8 +131,8 @@ export function TaskRow({
             key={target}
             type="button"
             className={`reschedule-btn rb-${target}`}
-            title={`${task.horizon === "someday" ? "Schedule" : "Move"} to ${HORIZON_LABEL[target]}`}
-            aria-label={`${task.horizon === "someday" ? "Schedule" : "Move"} to ${HORIZON_LABEL[target]}`}
+            title={rescheduleLabel(task.horizon, target)}
+            aria-label={rescheduleLabel(task.horizon, target)}
             onClick={() => onMove(target)}
           >
             {HORIZON_SHORT_LABEL[target]}

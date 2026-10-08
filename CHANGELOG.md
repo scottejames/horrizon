@@ -4,6 +4,35 @@ Notable changes to Horizon, newest first. See
 `.claude/skills/update-project-artifacts/SKILL.md` for how this file is
 kept current.
 
+## 2026-10-08
+
+### Added
+
+- Horizon is installable as a PWA (`vite-plugin-pwa`): manifest, app
+  icons, apple-touch-icon, light/dark `theme-color`, and an app-shell-only
+  service worker — AppSync/Cognito calls are deliberately never cached.
+- In-app help page (`public/help.html`, linked from a new **Help** button in
+  the header) describing how the app actually behaves today, in plain
+  language. It's a static page rather than part of the React bundle, so it
+  carries its own copy of the color/font tokens. Keeping it current is now
+  a step in `.claude/skills/update-project-artifacts`.
+
+### Fixed
+
+- Pulling a task forward (e.g. Tomorrow → Today) no longer marks it
+  "deferred from Tomorrow" or sinks it below open tasks — only moves to a
+  later horizon count as deferrals now. Toast and button labels ("Defer
+  to…" / "Schedule for…") follow the same `isDeferral()` rule.
+- Production backend build failed with `spawnSync docker ENOENT` after the
+  PWA dependency re-resolved the lockfile and dropped the top-level
+  `esbuild` CDK needs for Lambda bundling; `esbuild` is now an explicit
+  devDependency.
+
+### Changed
+
+- The Tomorrow tab's intro no longer implies its tasks move on their own;
+  rollover is manual until the automatic-rollover TODO ships.
+
 ## 2026-07-31
 
 ### Added

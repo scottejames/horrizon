@@ -38,6 +38,17 @@ Raised reviewing a real screenshot of the Areas of Responsibility tree
         it together with the real review mechanism above, not in
         isolation.
 
+- [ ] **Automatic day rollover.** Nothing moves tasks when the date
+      changes: Tomorrow tasks stay on Tomorrow (and Next Week on Next Week)
+      until moved by hand. Confirmed 2026-10-08 as a missing feature, not
+      intended behavior. Needs decisions before building: does an unfinished
+      Today task roll forward or stay put (see the Sunsama-style start-of-day
+      review idea below — these may be the same feature), what "next week"
+      means as a date boundary, and whether it runs client-side on load
+      (like the completed-task purge) or as a scheduled backend job. The
+      help page (`public/help.html`) and the Tomorrow tab's intro currently
+      say rollover is manual — update both when this ships.
+
 ## Later — features worth considering (researched 2026-07-30)
 
 Surveyed Things 3, OmniFocus, Todoist, TickTick, Amazing Marvin, and

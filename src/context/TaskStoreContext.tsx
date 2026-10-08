@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { client } from "../lib/dataClient";
 import { toCommitment, toHorizon, toPriority, toTaskState } from "../lib/guards";
+import { isDeferral } from "../lib/horizon";
 import { priorityRank, stateRank } from "../lib/taskRank";
 import type { Commitment, Horizon, Priority, Task } from "../types";
 
@@ -28,10 +29,9 @@ interface TaskStoreValue {
   /** Unlinks every task from a project that's being deleted; the tasks themselves are untouched. */
   unlinkTasksFromProject: (projectId: string) => void;
   /**
-   * Moves a task to another horizon. Coming from `someday` this is a
-   * one-way "Schedule" action (state becomes `open`); from anywhere else
-   * it's a "Defer" (state becomes `deferred`, tagged with where it came
-   * from) — see design/design-principles.md.
+   * Moves a task to another horizon. Moving later is a "Defer" (state
+   * becomes `deferred`, tagged with where it came from); moving earlier is
+   * a "Schedule" (state becomes `open`) — see design/design-principles.md.
    */
   moveTask: (id: string, target: Horizon) => void;
 }
@@ -147,9 +147,9 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
   function moveTask(id: string, target: Horizon) {
     const current = tasks.find((task) => task.id === id);
     if (!current) return;
-    const fromSomeday = current.horizon === "someday";
-    const nextState = fromSomeday ? "open" : "deferred";
-    const deferredFrom = fromSomeday ? undefined : current.horizon;
+    const deferring = isDeferral(current.horizon, target);
+    const nextState = deferring ? "deferred" : "open";
+    const deferredFrom = deferring ? current.horizon : undefined;
 
     setTasks((prev) =>
       prev.map((task) =>

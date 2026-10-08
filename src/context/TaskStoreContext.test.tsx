@@ -79,6 +79,7 @@ function TestHarness() {
           <li key={task.id}>
             {task.description}
             {task.deferredFrom ? ` (deferred from ${task.deferredFrom})` : ""}
+            <button onClick={() => moveTask(task.id, "today")}>pull forward {task.id}</button>
           </li>
         ))}
       </ul>
@@ -246,6 +247,27 @@ describe("TaskStoreContext", () => {
     expect(screen.queryByRole("list", { name: "today" })).not.toHaveTextContent("Buy stamps");
     expect(updateMock).toHaveBeenCalledWith(
       expect.objectContaining({ horizon: "tomorrow", state: "deferred", deferredFrom: "today" }),
+    );
+  });
+
+  it("pulling a task forward schedules it as open rather than deferring it", async () => {
+    // Regression: any move off a dated list used to count as a deferral,
+    // so Tomorrow → Today tagged the task "deferred from tomorrow".
+    const user = userEvent.setup();
+    render(
+      <TaskStoreProvider>
+        <TestHarness />
+      </TaskStoreProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "add task" }));
+    await user.click(await screen.findByRole("button", { name: /^defer / }));
+    await user.click(await screen.findByRole("button", { name: /^pull forward / }));
+
+    const todayList = screen.getByRole("list", { name: "today" });
+    expect(todayList).toHaveTextContent("Buy stamps");
+    expect(updateMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ horizon: "today", state: "open", deferredFrom: null }),
     );
   });
 });

@@ -62,8 +62,8 @@ export default function App() {
     setToastMessage(`Added to ${HORIZON_LABEL[horizon]}`);
   }
 
-  function handleMoved(target: Horizon, wasSomeday: boolean) {
-    setToastMessage(`${wasSomeday ? "Scheduled for" : "Deferred to"} ${HORIZON_LABEL[target]}`);
+  function handleMoved(target: Horizon, deferred: boolean) {
+    setToastMessage(`${deferred ? "Deferred to" : "Scheduled for"} ${HORIZON_LABEL[target]}`);
   }
 
   return (
@@ -77,7 +77,10 @@ export default function App() {
         <div className="appbar-right">
           <CommitmentToggle value={activeCommitment} onChange={setActiveCommitment} />
           <time className="today-date">{TODAY_LABEL}</time>
-          <button type="button" className="sign-out" onClick={signOut}>
+          <a className="header-button" href="/help.html">
+            Help
+          </a>
+          <button type="button" className="header-button" onClick={signOut}>
             Sign out
           </button>
         </div>
