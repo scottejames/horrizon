@@ -5,6 +5,7 @@ import { HorizonTabs } from "./components/HorizonTabs";
 import { Logo } from "./components/Logo";
 import { ProjectDrawer } from "./components/ProjectDrawer";
 import { Sidebar } from "./components/Sidebar";
+import { TaskDrawer } from "./components/TaskDrawer";
 import { TaskList } from "./components/TaskList";
 import { Toast } from "./components/Toast";
 import { useTaskStore } from "./context/TaskStoreContext";
@@ -24,6 +25,7 @@ export default function App() {
   const [activeHorizon, setActiveHorizon] = useState<Horizon>("today");
   const [activeCommitment, setActiveCommitment] = useState<Commitment>("personal");
   const [openProjectId, setOpenProjectId] = useState<string | null>(null);
+  const [openTaskId, setOpenTaskId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [debugMode, setDebugMode] = useState(false);
   const { tasks } = useTaskStore();
@@ -99,6 +101,7 @@ export default function App() {
             horizon={activeHorizon}
             commitment={activeCommitment}
             onOpenProject={setOpenProjectId}
+            onOpenTaskNotes={setOpenTaskId}
             onMoved={handleMoved}
           />
         </main>
@@ -110,6 +113,7 @@ export default function App() {
         debugEnabled={debugMode && isDebugEligible}
         narrativeMaintenance={narrativeMaintenance}
       />
+      <TaskDrawer taskId={openTaskId} onClose={() => setOpenTaskId(null)} />
       <Toast message={toastMessage} onDone={() => setToastMessage(null)} />
     </div>
   );

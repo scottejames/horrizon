@@ -12,10 +12,17 @@ interface TaskListProps {
   horizon: Horizon;
   commitment: Commitment;
   onOpenProject: (projectId: string) => void;
+  onOpenTaskNotes: (taskId: string) => void;
   onMoved: (target: Horizon, deferred: boolean) => void;
 }
 
-export function TaskList({ horizon, commitment, onOpenProject, onMoved }: TaskListProps) {
+export function TaskList({
+  horizon,
+  commitment,
+  onOpenProject,
+  onOpenTaskNotes,
+  onMoved,
+}: TaskListProps) {
   const { tasksByHorizon, toggleDone, updateDescription, updatePriority, deleteTask, moveTask } =
     useTaskStore();
   const { projects } = useProjectStore();
@@ -72,6 +79,7 @@ export function TaskList({ horizon, commitment, onOpenProject, onMoved }: TaskLi
               onChangePriority={(priority) => updatePriority(task.id, priority)}
               onDelete={() => deleteTask(task.id)}
               onOpenProject={onOpenProject}
+              onOpenNotes={() => onOpenTaskNotes(task.id)}
             />
           ))}
         </ul>

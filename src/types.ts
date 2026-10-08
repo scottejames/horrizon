@@ -14,6 +14,14 @@ export interface Task {
   projectId?: string;
   /** ISO datetime set when state becomes 'done'; cleared if un-done. Drives the 24h purge. */
   completedAt?: string;
+  /** Append-only progress log, oldest first. Deleted along with the task by the 24h purge. */
+  notes: TaskNote[];
+}
+
+export interface TaskNote {
+  /** ISO datetime the note was added. */
+  at: string;
+  text: string;
 }
 
 export interface Project {

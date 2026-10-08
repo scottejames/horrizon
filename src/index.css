@@ -416,6 +416,7 @@ ul {
 .tree-project .delete-btn,
 .task .rename-btn,
 .task .delete-btn,
+.task .notes-btn:not(.has-notes),
 .drawer-title-row .rename-btn,
 .drawer-title-row .delete-btn {
   display: none;
@@ -432,6 +433,8 @@ ul {
 .task:hover .delete-btn,
 .task:focus-within .rename-btn,
 .task:focus-within .delete-btn,
+.task:hover .notes-btn,
+.task:focus-within .notes-btn,
 .drawer-title-row:hover .rename-btn,
 .drawer-title-row:hover .delete-btn,
 .project-drawer:focus-within .rename-btn,
@@ -981,6 +984,32 @@ ul {
   color: var(--ink);
 }
 
+/* A task with notes always shows its count so it stands out in the list;
+   one without only offers the button on hover, like rename/delete. */
+.notes-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--fs-sm);
+  line-height: 1;
+  padding: 3px 5px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--ink-soft);
+}
+.notes-btn:hover {
+  background: var(--surface-2);
+  color: var(--accent);
+}
+.notes-count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xxs);
+  font-weight: 700;
+}
+
 .deferred-tag {
   font-size: var(--fs-xxs);
   color: var(--ink-soft);
@@ -1209,7 +1238,7 @@ details.project-move[open] summary {
 .confirm-yes:hover {
   filter: brightness(1.08);
 }
-.project-drawer {
+.drawer {
   position: fixed;
   top: 0;
   right: 0;
@@ -1225,7 +1254,7 @@ details.project-move[open] summary {
   display: flex;
   flex-direction: column;
 }
-.project-drawer.open {
+.drawer.open {
   transform: translateX(0);
 }
 .drawer-close {
@@ -1393,6 +1422,40 @@ details.drawer-move[open] summary {
   font-size: var(--fs-xxs);
   color: var(--ink-soft);
   white-space: nowrap;
+}
+.drawer-task-horizon {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+}
+.drawer-header .drawer-task-title {
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+.drawer-notes {
+  flex: 1;
+  overflow-y: auto;
+  border-bottom: none;
+}
+.task-notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.task-notes time {
+  font-size: var(--fs-xxs);
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+.task-notes p {
+  margin: 2px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .drawer-empty {
   color: var(--ink-soft);

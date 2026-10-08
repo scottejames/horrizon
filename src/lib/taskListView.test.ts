@@ -10,6 +10,7 @@ function task(overrides: Partial<Task>): Task {
     horizon: "today",
     state: "open",
     commitment: "personal",
+    notes: [],
     ...overrides,
   };
 }

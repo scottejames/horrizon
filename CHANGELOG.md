@@ -8,6 +8,16 @@ kept current.
 
 ### Added
 
+- Progress notes on tasks. A 📝 button on each task row opens a task drawer
+  where you add dated notes, so you can record how a task is going instead
+  of it just being a single line. Notes are only ever added, never edited,
+  and show newest first. A task that has notes always shows the count on
+  its row. Stored in a new `Task.notes` `a.json()` field rather than a
+  separate model, so there's no second table to cascade-delete or purge.
+  Notes are deleted along with the task by the 24h purge (accepted for now;
+  see the archive item in `TODO.md`). This is step 1 of the "Task notes"
+  item; the checklist and "promote to project" are still to come.
+
 - Horizon is installable as a PWA (`vite-plugin-pwa`): manifest, app
   icons, apple-touch-icon, light/dark `theme-color`, and an app-shell-only
   service worker — AppSync/Cognito calls are deliberately never cached.
@@ -16,6 +26,13 @@ kept current.
   language. It's a static page rather than part of the React bundle, so it
   carries its own copy of the color/font tokens. Keeping it current is now
   a step in `.claude/skills/update-project-artifacts`.
+
+### Changed
+
+- The project drawer's scrim, close button, Escape-to-close and focus
+  handling moved into a shared `Drawer` component so the new task drawer
+  uses the same behavior instead of a copy of it. The positioning CSS class
+  is now `.drawer`; `.project-drawer` remains for project-only rules.
 
 ### Fixed
 

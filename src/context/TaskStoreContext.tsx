@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { client } from "../lib/dataClient";
-import { toCommitment, toHorizon, toPriority, toTaskState } from "../lib/guards";
+import { toCommitment, toHorizon, toPriority, toTaskNotes, toTaskState } from "../lib/guards";
 import { isDeferral } from "../lib/horizon";
 import { priorityRank, stateRank } from "../lib/taskRank";
 import type { Commitment, Horizon, Priority, Task } from "../types";
@@ -23,6 +23,7 @@ interface TaskStoreValue {
   toggleDone: (id: string) => void;
   updateDescription: (id: string, description: string) => void;
   updatePriority: (id: string, priority: Priority) => void;
+  addTaskNote: (id: string, text: string) => void;
   deleteTask: (id: string) => void;
   /** Bulk delete, used by the narrative-maintenance purge. */
   deleteTasks: (ids: string[]) => void;
@@ -56,6 +57,7 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
             deferredFrom: item.deferredFrom ? toHorizon(item.deferredFrom) : undefined,
             projectId: item.projectId ?? undefined,
             completedAt: item.completedAt ?? undefined,
+            notes: toTaskNotes(item.notes),
           })),
         );
         if (isSynced) setTasksReady(true);
@@ -81,7 +83,7 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
 
   function addTask(input: AddTaskInput) {
     const id = crypto.randomUUID();
-    const task: Task = { id, state: "open", ...input };
+    const task: Task = { id, state: "open", notes: [], ...input };
     setTasks((prev) => [...prev, task]);
     client.models.Task.create({
       id,
@@ -115,6 +117,15 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
   function updatePriority(id: string, priority: Priority) {
     setTasks((prev) => prev.map((task) => (task.id === id ? { ...task, priority } : task)));
     client.models.Task.update({ id, priority }).catch(console.error);
+  }
+
+  function addTaskNote(id: string, text: string) {
+    const current = tasks.find((task) => task.id === id);
+    if (!current) return;
+    const notes = [...current.notes, { at: new Date().toISOString(), text }];
+    setTasks((prev) => prev.map((task) => (task.id === id ? { ...task, notes } : task)));
+    // a.json() fields must be sent as a JSON string, not a plain array.
+    client.models.Task.update({ id, notes: JSON.stringify(notes) }).catch(console.error);
   }
 
   function deleteTask(id: string) {
@@ -178,6 +189,7 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
         toggleDone,
         updateDescription,
         updatePriority,
+        addTaskNote,
         deleteTask,
         deleteTasks,
         unlinkTasksFromProject,

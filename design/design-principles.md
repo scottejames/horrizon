@@ -387,3 +387,36 @@ width since a task's own horizon is never one of its own reschedule
 targets, so "Someday" appears at most once per row. If a future change
 adds a fifth horizon, revisit this — four buttons might
 still fit, but don't let it grow unbounded before checking.
+
+## Task notes are an append-only log on the task, opened in a drawer
+
+Added 2026-10-08. A task can hold dated progress notes ("8 Oct: emailed
+supplier, waiting on quote"), so that how a task is going gets recorded
+without the task itself having to change.
+
+- **Append-only, not one editable text box.** The point is a record of
+  progress over time, which a single overwritable field loses. Notes have
+  no edit or delete. If that turns out to be too strict in practice
+  (typos), deleting a single note is the obvious next step. Editing in
+  place would undo the point of a log.
+- **Stored on the Task row (`notes: a.json()`), not as a `TaskNote` model.**
+  A separate model would need its own cascade delete when a task is deleted
+  and its own handling in the 24h purge, and would add another way for
+  writes to race (see the narrative race notes above). The trade-off is that
+  every append rewrites the whole array, so two devices appending at the
+  same moment would lose one note. That's acceptable for a single-user app.
+- **Shown newest first, under the input.** The latest progress is what you
+  want to see when you reopen a task, and the input sits at the top of the
+  drawer. Storage stays oldest-first, since that's the natural append order.
+- **The row button follows the hover-only icon rule, with one exception.**
+  With no notes, 📝 appears only on hover/focus, like rename and delete.
+  With notes, it always shows along with the count, because "this task has
+  history" is information worth seeing at rest, not just an action.
+- **The drawer chrome is shared (`Drawer.tsx`).** Scrim, close button,
+  Escape and focus-on-open were in `ProjectDrawer`. They moved into one
+  component instead of being copied, since both drawers should behave the
+  same and change for the same reasons.
+- **Notes die with the task in the 24h purge, and aren't folded into the
+  project narrative.** This was accepted on purpose (2026-10-08). The fix
+  is the "archive instead of delete" item in `TODO.md`, not special-casing
+  notes in the purge.

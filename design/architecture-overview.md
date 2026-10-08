@@ -39,6 +39,14 @@ header's Personal/Work toggle. See `design-principles.md`'s "Personal/Work
 is a second, independent filter" entry for why it's independent rather than
 derived, and how the frontend still defaults it sensibly at creation time.
 
+`Task.notes` (`AWSJSON`, added 2026-10-08) is a task's progress log, an
+array of `{ at, text }` kept on the Task row itself rather than in a
+separate model. It's written as a JSON string (`a.json()` fields require
+that) and read back through `toTaskNotes` in `src/lib/guards.ts`, which
+accepts either a string or an already-parsed array and drops anything
+malformed. Rows from before the field existed come back as `null`, read as
+no notes.
+
 `Task.completedAt` (`AWSDateTime`, added 2026-07-31) is set when a task's
 state becomes `'done'` and cleared if it's un-done or moved to another
 horizon — it drives the 24-hour purge of completed tasks. `Project.narrative`,

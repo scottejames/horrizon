@@ -49,6 +49,45 @@ Raised reviewing a real screenshot of the Areas of Responsibility tree
       help page (`public/help.html`) and the Tomorrow tab's intro currently
       say rollover is manual — update both when this ships.
 
+- [ ] **Task notes: progress log, checklist, promote to project.** Lets a
+      task hold notes so progress can be recorded and the task broken down
+      as needed. Agreed design (2026-10-08), to be built in this order:
+      1. ~~**Progress log.**~~ Shipped 2026-10-08 (see CHANGELOG). Dated entries that are only ever added to (e.g.
+         "8 Oct: emailed supplier, waiting on quote"), never edited in
+         place. Stored as a `notes: a.json()` array of `{ at, text }` on
+         `Task` itself. Not a separate `TaskNote` model, because that
+         would need its own cascade-delete/purge logic and would add
+         another way for writes to race (see design-principles.md's
+         narrative race notes). A task drawer modelled on `ProjectDrawer`
+         opens from a task and shows the log plus an "add progress note"
+         input. `TaskRow` gets a small indicator (e.g. a note count or
+         `2/5`) so tasks with detail stand out in the list.
+      2. **Checklist.** `checklist: a.json()` array of `{ id, text, done }`
+         on `Task`, shown in the same drawer. Items are plain steps with no
+         horizon, priority, or commitment of their own.
+      3. **Promote to project.** Once a step needs its own schedule, it's a
+         real task, and Horizon already groups tasks with Projects. Don't
+         add `parentTaskId` subtasks, which would duplicate Projects. Instead,
+         a "Promote to project" action creates a Project from the task,
+         turns unfinished checklist items into tasks in that project, and
+         copies the progress log into the project's narrative.
+      **Purge interaction:** a task's notes are deleted along with the
+      task when the 24h purge runs. That loss is accepted for now and is
+      resolved by the archive item below, not by special-casing notes.
+- [ ] **Archive completed tasks instead of deleting them at 24h.** Today a
+      done task is deleted 24h after completion. Change this so that at 24h
+      it's *archived* (hidden from the horizon lists but still stored and
+      viewable), then actually deleted about a week later. This leaves
+      time to capture anything worth keeping, especially task notes (see
+      above), before it's gone. Open questions: exact retention period
+      (~7 days), where archived tasks are viewed (per project? a global
+      Archive view?), whether the narrative fold-in happens at archive time
+      or at deletion, and whether a task can be un-archived. Touches
+      `useNarrativeMaintenance` / `src/lib/narrative.ts` and the
+      design-principles.md "Completed tasks fade into a project's
+      narrative" entry. Same client-side-timer limitation applies.
+      Raised 2026-10-08; not started.
+
 ## Later — features worth considering (researched 2026-07-30)
 
 Surveyed Things 3, OmniFocus, Todoist, TickTick, Amazing Marvin, and
@@ -79,8 +118,8 @@ building.
       support as a second, independent dimension alongside Project — e.g.
       "everything I can do on the phone," regardless of which project or
       area it belongs to.
-- [ ] **Subtasks/checklists within a task** — Todoist and TickTick both
-      support this; useful once a Today task is bigger than one line item.
+- [x] ~~**Subtasks/checklists within a task**~~ — folded into "Task
+      notes: progress log, checklist, promote to project" under Up next.
 - [ ] **Kanban/board view per project** — of the GTD-focused apps, only
       Todoist has this; an alternative way to view one project's tasks
       instead of only via the horizon-tabbed list.

@@ -17,6 +17,7 @@ interface TaskRowProps {
   onChangePriority: (priority: Priority) => void;
   onDelete: () => void;
   onOpenProject: (projectId: string) => void;
+  onOpenNotes: () => void;
 }
 
 const PRIORITY_ORDER: Priority[] = ["high", "med", "low"];
@@ -31,11 +32,13 @@ export function TaskRow({
   onChangePriority,
   onDelete,
   onOpenProject,
+  onOpenNotes,
 }: TaskRowProps) {
   const priorityDetailsRef = useRef<HTMLDetailsElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
   const rename = useInlineRename(task.description, onRename, renameInputRef);
   const requestConfirm = useConfirm();
+  const noteCount = task.notes.length;
   const rescheduleTargets = HORIZON_ORDER.filter((horizon) => horizon !== task.horizon);
 
   function handleChangePriority(priority: Priority) {
@@ -113,6 +116,15 @@ export function TaskRow({
           </button>
         </>
       )}
+      <button
+        type="button"
+        className={`notes-btn${noteCount > 0 ? " has-notes" : ""}`}
+        aria-label={`Progress notes for ${task.description}${noteCount > 0 ? ` (${noteCount})` : ""}`}
+        title="Progress notes"
+        onClick={onOpenNotes}
+      >
+        📝{noteCount > 0 && <span className="notes-count">{noteCount}</span>}
+      </button>
       {task.state === "deferred" && task.deferredFrom && (
         <span className="deferred-tag">↩ deferred from {HORIZON_LABEL[task.deferredFrom]}</span>
       )}

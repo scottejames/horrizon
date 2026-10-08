@@ -225,6 +225,12 @@
           <li><b>Priority</b> is the three-bar signal on each task: more filled bars means higher priority. Click it to change the priority.</li>
           <li><b>Project chip</b>: click a task's <code>#CODE</code> to open that project.</li>
           <li>
+            <b>Progress notes</b>: click a task's 📝 button (it appears when you hover over the task)
+            to open its notes. Type what's happened and press Enter. Each note is stamped with the
+            date and time, and the newest shows first. Notes can't be edited or deleted once
+            added. A task with notes always shows 📝 and how many it has.
+          </li>
+          <li>
             <b>Search, filter and sort</b> sit above the list. You can search descriptions, filter by
             priority or project (including “No project”), and sort by Priority, Alphabetical or
             Project. Whatever the sort, open tasks always come first, then deferred ones, then done
@@ -312,7 +318,9 @@
         <p>
           A done task stays visible for 24 hours, then it's deleted for good. If it belonged to a
           project, a line recording it is added to that project's <b>Progress</b> summary first, so
-          the record isn't lost. Once a day the summary condenses older entries into a single running
+          the record isn't lost. A task's progress notes are deleted along with it and are
+          <b>not</b> copied into the project's summary, so copy out anything you want to keep
+          before then. Once a day the summary condenses older entries into a single running
           total, so it stays short.
         </p>
         <p class="note">

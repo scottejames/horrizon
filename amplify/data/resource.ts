@@ -31,6 +31,7 @@ const schema = a.schema({
       deferredFrom: a.string(), // horizon this task was deferred from, set only while state === 'deferred'
       projectId: a.string(),
       completedAt: a.datetime(), // set when state becomes 'done', cleared if un-done; drives the 24h purge
+      notes: a.json(), // append-only progress log, an array of { at, text }; deleted with the task by the purge
     })
     .authorization((allow) => [allow.owner()]),
 
