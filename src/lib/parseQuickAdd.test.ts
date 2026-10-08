@@ -36,7 +36,11 @@ describe("parseQuickAdd", () => {
   it("recognizes every schedule keyword", () => {
     expect(parseQuickAdd("Task today")).toMatchObject({ horizon: "today", horizonExplicit: true });
     expect(parseQuickAdd("Task tomorrow")).toMatchObject({ horizon: "tomorrow", horizonExplicit: true });
-    expect(parseQuickAdd("Task next week")).toMatchObject({ horizon: "week", horizonExplicit: true });
+    expect(parseQuickAdd("Task next week")).toMatchObject({
+      description: "Task",
+      horizon: "someday",
+      horizonExplicit: true,
+    });
     expect(parseQuickAdd("Task someday")).toMatchObject({ horizon: "someday", horizonExplicit: true });
   });
 

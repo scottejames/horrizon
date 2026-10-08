@@ -1,5 +1,5 @@
 export type Priority = "high" | "med" | "low";
-export type Horizon = "today" | "tomorrow" | "week" | "someday";
+export type Horizon = "today" | "tomorrow" | "someday";
 export type TaskState = "open" | "done" | "deferred";
 export type Commitment = "personal" | "work";
 

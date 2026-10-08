@@ -1,6 +1,13 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { client } from "../lib/dataClient";
-import { toCommitment, toHorizon, toPriority, toTaskNotes, toTaskState } from "../lib/guards";
+import {
+  legacyHorizonFix,
+  toCommitment,
+  toHorizon,
+  toPriority,
+  toTaskNotes,
+  toTaskState,
+} from "../lib/guards";
 import { isDeferral } from "../lib/horizon";
 import { priorityRank, stateRank } from "../lib/taskRank";
 import type { Commitment, Horizon, Priority, Task } from "../types";
@@ -42,10 +49,19 @@ const TaskStoreContext = createContext<TaskStoreValue | null>(null);
 export function TaskStoreProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [tasksReady, setTasksReady] = useState(false);
+  // Rows already sent a legacy-horizon fix, so a re-emission arriving before
+  // the write lands doesn't send it again.
+  const migratedIdsRef = useRef(new Set<string>());
 
   useEffect(() => {
     const sub = client.models.Task.observeQuery().subscribe({
       next: ({ items, isSynced }) => {
+        items.forEach((item) => {
+          const fix = legacyHorizonFix(item);
+          if (!fix || migratedIdsRef.current.has(item.id)) return;
+          migratedIdsRef.current.add(item.id);
+          client.models.Task.update({ id: item.id, ...fix }).catch(console.error);
+        });
         setTasks(
           items.map((item) => ({
             id: item.id,
@@ -54,7 +70,10 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
             horizon: toHorizon(item.horizon),
             state: toTaskState(item.state),
             commitment: toCommitment(item.commitment),
-            deferredFrom: item.deferredFrom ? toHorizon(item.deferredFrom) : undefined,
+            deferredFrom:
+              item.deferredFrom && item.deferredFrom !== "week"
+                ? toHorizon(item.deferredFrom)
+                : undefined,
             projectId: item.projectId ?? undefined,
             completedAt: item.completedAt ?? undefined,
             notes: toTaskNotes(item.notes),

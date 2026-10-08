@@ -730,10 +730,6 @@ ul {
   background: var(--tomorrow-wash);
   color: var(--tomorrow);
 }
-.parse-chip.pc-week {
-  background: var(--week-wash);
-  color: var(--week);
-}
 .parse-chip.pc-someday {
   background: var(--someday-wash);
   color: var(--someday);
@@ -766,6 +762,34 @@ ul {
   align-items: center;
   gap: 7px;
 }
+.tab-group-label {
+  align-self: center;
+  font-size: var(--fs-xxs);
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding-left: 4px;
+}
+/* The Do/Plan split is the app's core idea, so it gets a visible break
+   rather than reading as just one more tab. */
+.tab-group-label--split {
+  margin-left: 14px;
+  padding-left: 18px;
+  border-left: 1px solid var(--border-strong);
+}
+/* Three tabs plus two group labels must fit a phone without scrolling the
+   Plan tab out of sight. */
+@media (max-width: 480px) {
+  .tab {
+    padding: 10px 7px 12px;
+    gap: 5px;
+  }
+  .tab-group-label--split {
+    margin-left: 4px;
+    padding-left: 10px;
+  }
+}
 .tab .count {
   font-family: var(--font-mono);
   font-size: var(--fs-xxs);
@@ -782,10 +806,6 @@ ul {
 .tab[data-horizon="tomorrow"].active {
   color: var(--tomorrow);
   border-color: var(--tomorrow);
-}
-.tab[data-horizon="week"].active {
-  color: var(--week);
-  border-color: var(--week);
 }
 .tab[data-horizon="someday"].active {
   color: var(--someday);
@@ -1036,6 +1056,54 @@ ul {
   color: var(--accent);
 }
 
+/* In the Do list the project is context, not the point: the chip stays
+   clickable but steps back so the work itself reads first. */
+.task-list--do .chip-project {
+  background: none;
+  border-color: transparent;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+.task-list--do .chip-project:hover {
+  border-color: var(--border-strong);
+}
+
+/* ============ Plan view: Someday grouped by project ============ */
+.plan-group {
+  margin-bottom: 22px;
+}
+.plan-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.plan-group-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+}
+.plan-group-link:hover {
+  color: var(--accent);
+}
+.plan-group-link .chip-project {
+  cursor: inherit;
+}
+.plan-group-title .count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xxs);
+  color: var(--ink-soft);
+}
+
 .task-actions {
   flex-shrink: 0;
   display: flex;
@@ -1066,13 +1134,6 @@ ul {
 }
 .reschedule-btn.rb-tomorrow:hover {
   background: var(--tomorrow-wash);
-}
-.reschedule-btn.rb-week {
-  border-color: var(--week);
-  color: var(--week);
-}
-.reschedule-btn.rb-week:hover {
-  background: var(--week-wash);
 }
 .reschedule-btn.rb-someday {
   border-color: var(--someday);
@@ -1155,9 +1216,6 @@ details.project-move[open] summary {
 }
 .horizon-dot.h-tomorrow {
   background: var(--tomorrow);
-}
-.horizon-dot.h-week {
-  background: var(--week);
 }
 .horizon-dot.h-someday {
   background: var(--someday);
@@ -1456,6 +1514,21 @@ details.drawer-move[open] summary {
   margin: 2px 0 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+.drawer-plan-notice {
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.drawer-plan-notice p {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  margin: 0 0 10px;
+}
+.drawer-plan-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .drawer-empty {
   color: var(--ink-soft);

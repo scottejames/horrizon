@@ -25,7 +25,7 @@ const schema = a.schema({
     .model({
       description: a.string().required(),
       priority: a.string().required(), // 'high' | 'med' | 'low'
-      horizon: a.string().required(), // 'today' | 'tomorrow' | 'week' | 'someday'
+      horizon: a.string().required(), // 'today' | 'tomorrow' | 'someday' (legacy 'week' is migrated to 'someday' on load)
       state: a.string().required(), // 'open' | 'done' | 'deferred'
       commitment: a.string().required(), // 'personal' | 'work'
       deferredFrom: a.string(), // horizon this task was deferred from, set only while state === 'deferred'

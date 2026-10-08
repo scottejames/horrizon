@@ -143,7 +143,7 @@ function ProjectRapidCapture({ project }: ProjectRapidCaptureProps) {
         </button>
       </div>
       <p className="capture-hint">
-        Defaults to <b>Someday</b> unless you type <b>today / tomorrow / next week</b> &middot;{" "}
+        Defaults to <b>Someday</b> unless you type <b>today / tomorrow</b> &middot;{" "}
         <b>!high !med !low</b> priority &middot; always linked to #{project.shortCode}
       </p>
     </div>

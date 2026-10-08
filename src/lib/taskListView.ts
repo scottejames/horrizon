@@ -69,3 +69,35 @@ export function sortTasks(
     return priorityRank(a.priority) - priorityRank(b.priority);
   });
 }
+
+export interface ProjectGroup {
+  /** `undefined` for the "No project" group. */
+  project: Project | undefined;
+  tasks: Task[];
+}
+
+/**
+ * The Plan view's shape: projects broken down into tasks (see
+ * design-principles.md's "Plan vs Do" entry). Groups are ordered by short
+ * code with unassigned tasks last; each group keeps the incoming task order,
+ * so the chosen sort still applies within it. A task whose project no longer
+ * exists counts as unassigned rather than vanishing.
+ */
+export function groupByProject(tasks: Task[], projectsById: Map<string, Project>): ProjectGroup[] {
+  const groups = new Map<string, { project: Project; tasks: Task[] }>();
+  const unassigned: Task[] = [];
+  for (const task of tasks) {
+    const project = task.projectId ? projectsById.get(task.projectId) : undefined;
+    if (!project) {
+      unassigned.push(task);
+      continue;
+    }
+    const group = groups.get(project.id) ?? { project, tasks: [] };
+    group.tasks.push(task);
+    groups.set(project.id, group);
+  }
+  const ordered: ProjectGroup[] = [...groups.values()].sort((a, b) =>
+    a.project.shortCode.localeCompare(b.project.shortCode),
+  );
+  return unassigned.length > 0 ? [...ordered, { project: undefined, tasks: unassigned }] : ordered;
+}

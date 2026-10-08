@@ -1,7 +1,13 @@
 import { useRef } from "react";
 import { useConfirm } from "../context/ConfirmContext";
 import { useInlineRename } from "../hooks/useInlineRename";
-import { HORIZON_LABEL, HORIZON_ORDER, HORIZON_SHORT_LABEL, isDeferral } from "../lib/horizon";
+import {
+  HORIZON_LABEL,
+  HORIZON_ORDER,
+  HORIZON_SHORT_LABEL,
+  isDeferral,
+  isDoHorizon,
+} from "../lib/horizon";
 import type { Horizon, Priority, Project, Task } from "../types";
 
 function rescheduleLabel(from: Horizon, to: Horizon): string {
@@ -116,15 +122,19 @@ export function TaskRow({
           </button>
         </>
       )}
-      <button
-        type="button"
-        className={`notes-btn${noteCount > 0 ? " has-notes" : ""}`}
-        aria-label={`Progress notes for ${task.description}${noteCount > 0 ? ` (${noteCount})` : ""}`}
-        title="Progress notes"
-        onClick={onOpenNotes}
-      >
-        📝{noteCount > 0 && <span className="notes-count">{noteCount}</span>}
-      </button>
+      {/* Notes are for work in the Do window. A Plan task keeps (and shows)
+          any notes it already has, but doesn't invite new ones. */}
+      {(isDoHorizon(task.horizon) || noteCount > 0) && (
+        <button
+          type="button"
+          className={`notes-btn${noteCount > 0 ? " has-notes" : ""}`}
+          aria-label={`Progress notes for ${task.description}${noteCount > 0 ? ` (${noteCount})` : ""}`}
+          title="Progress notes"
+          onClick={onOpenNotes}
+        >
+          📝{noteCount > 0 && <span className="notes-count">{noteCount}</span>}
+        </button>
+      )}
       {task.state === "deferred" && task.deferredFrom && (
         <span className="deferred-tag">↩ deferred from {HORIZON_LABEL[task.deferredFrom]}</span>
       )}

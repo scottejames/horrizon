@@ -5,10 +5,55 @@ Decisions confirmed while reviewing the first UI mockup (2026-07-30, see the
 calls, not open questions — build against them rather than re-litigating in a
 future change, unless a real usage problem contradicts one.
 
+## Plan vs Do: you plan far ahead, but you only work on what's near
+
+Added 2026-10-08. This is the idea the rest of the app is organised around.
+
+You can only actually *do* things over a short window. Beyond that you
+can plan, but the plan should stay high level. Horizon keeps the two apart:
+
+- **Do is Today and Tomorrow** (`DO_HORIZONS` in `src/lib/horizon.ts`).
+  These are tasks you're working on. Only here does a task get progress
+  notes, and (when they ship) a checklist of steps. The Do list should stay
+  clean and short. A task's project is shown, but toned down: near term,
+  the focus is the work, not where it fits.
+- **Plan is Someday.** Everything beyond the Do window. Tasks here are
+  captured and organised, but not scheduled and not worked on. The Plan
+  view is allowed to be cluttered, so it's grouped by project to keep that
+  clutter organised. Its natural shape is *projects broken down into tasks*.
+- **Moving a task into Do is the commitment.** To record progress on a task
+  or break it down, you move it to Today or Tomorrow first. A Plan task can
+  still be renamed, reprioritised, linked to a project, completed or
+  deleted. That's ordinary planning. What it can't be is *worked on*.
+- **Each mode breaks things down one level.** In Plan, a project breaks into
+  tasks. In Do, a task breaks into steps and progress. "Promote to project"
+  (in `TODO.md`) is the way back up: a Do task that turns out to be big
+  becomes a project in the plan.
+
+This is a design choice more than a restriction. The UI makes working on
+the near term easy and doesn't invite working on the far term, rather than
+throwing errors at you.
+
+- **Next Week was removed for this.** It was a dated horizon beyond the Do
+  window, which contradicts "the plan isn't scheduled". Existing Next Week
+  tasks are moved to Someday on load (`legacyHorizonFix` in
+  `src/lib/guards.ts`); typing `next week` in quick-add now lands in
+  Someday too. A "deferred from Next Week" tag has no equivalent and is
+  dropped. The task itself is never touched beyond its horizon.
+- **Never lose data when a task moves back to Plan.** A task that has notes
+  keeps them when it's deferred to Someday. They stay visible (📝 count on
+  the row, read-only in the drawer); only adding new ones is held back
+  until the task is back in Do. The drawer offers "Move to Today/Tomorrow"
+  right there.
+- **The tabs show the split.** Small "Do" and "Plan" labels group the tabs,
+  with a divider between them, so the line is visible all the time instead
+  of being one more tab in a row.
+
 ## Color is spent on time-horizon only
 
-Today / Tomorrow / Next Week / Someday each get one fixed hue (warm amber,
-teal, slate-blue, mauve). No other dimension of the UI is allowed to introduce
+Today / Tomorrow / Someday each get one fixed hue (warm amber, teal,
+mauve). Next Week's slate-blue was retired with that horizon (2026-10-08)
+and survives only in the logo. No other dimension of the UI is allowed to introduce
 a new color family — that's the one categorical color scale the app gets, and
 it needs to stay legible on sight without competing with anything else.
 
@@ -23,7 +68,7 @@ not a louder priority color.
 
 ## A deferred task carries where it came from
 
-Deferring a task (Today/Tomorrow/Next Week → any other horizon) doesn't just
+Deferring a task (Today/Tomorrow → any later horizon) doesn't just
 move it — the moved task keeps a small "deferred from {horizon}" tag wherever
 it lands, distinct from a task natively scheduled there. This is deliberate:
 it's a light signal for noticing your own procrastination patterns (the same
@@ -64,7 +109,7 @@ the app.
 ## Quick-add is one free-text field, parsed inline
 
 Priority (`!high`/`!med`/`!low`), project (`#code`), and schedule
-(`today`/`tomorrow`/`next week`/`someday`) are all extracted from the same
+(`today`/`tomorrow`/`someday`, with `next week` read as someday) are all extracted from the same
 single input rather than split into separate form fields — capture speed
 matters more than structured input here. An unrecognized `#code` is still
 accepted and chipped (labeled "project (new)") instead of rejected; the parser
@@ -356,7 +401,7 @@ matching the app's core premise, an app for things you want to do today.
 `ProjectRapidCapture` (inside the project drawer) instead defaults to
 Someday, because its use case is different: brain-dumping everything a
 project might ever need, not committing to doing all of it today. Both
-still honor an explicit `today`/`tomorrow`/`next week`/`someday` keyword
+still honor an explicit `today`/`tomorrow`/`someday` keyword
 the same way. This needed `parseQuickAdd` to expose `horizonExplicit`
 (false when `horizon` is only the "today" fallback) rather than baking one
 default into the parser — don't remove that field to "simplify" the
@@ -376,7 +421,7 @@ of a menu that has to be opened first. The colors reuse the same
 `--accent`/`--tomorrow`/`--week`/`--someday` tokens as the horizon tabs and
 `.horizon-dot`, not a new palette — so a task row's reschedule buttons read
 as "the same four horizons" the rest of the app already color-codes, not a
-new visual language to learn. Labels are abbreviated (`Tdy`/`Tmrw`/`Wk` —
+new visual language to learn. Labels are abbreviated (`Tdy`/`Tmrw`; `Wk` until Next Week was removed —
 see `HORIZON_SHORT_LABEL` in `lib/horizon.ts`) to fit three buttons in the
 same row that used to hold one dropdown button; the full word is still in
 each button's `title`/`aria-label` for anyone who needs it spelled out.
@@ -405,6 +450,8 @@ without the task itself having to change.
   writes to race (see the narrative race notes above). The trade-off is that
   every append rewrites the whole array, so two devices appending at the
   same moment would lose one note. That's acceptable for a single-user app.
+- **Only Do tasks take new notes.** See "Plan vs Do" above. A Someday task
+  keeps and shows its notes but doesn't offer the input.
 - **Shown newest first, under the input.** The latest progress is what you
   want to see when you reopen a task, and the input sits at the top of the
   drawer. Storage stays oldest-first, since that's the natural append order.

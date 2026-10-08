@@ -121,7 +121,6 @@
       .dot { flex: none; width: 10px; height: 10px; border-radius: 50%; display: inline-block; transform: translateY(1px); }
       .d-today { background: var(--accent); }
       .d-tomorrow { background: var(--tomorrow); }
-      .d-week { background: var(--week); }
       .d-someday { background: var(--someday); }
       .note {
         border-left: 3px solid var(--border-strong);
@@ -145,7 +144,8 @@
 
       <nav class="toc" aria-label="Contents">
         <ol>
-          <li><a href="#horizons">The four horizons</a></li>
+          <li><a href="#plan-do">Plan and Do</a></li>
+          <li><a href="#horizons">The three horizons</a></li>
           <li><a href="#adding">Adding tasks</a></li>
           <li><a href="#working">Working your list</a></li>
           <li><a href="#rescheduling">Rescheduling</a></li>
@@ -158,15 +158,45 @@
         </ol>
       </nav>
 
+      <section id="plan-do">
+        <h2>Plan and Do</h2>
+        <p>
+          Horizon separates <b>planning</b> from <b>getting things done</b>. You can only really work
+          on things over a short window. Beyond that you can plan, but the plan should stay high
+          level.
+        </p>
+        <ul>
+          <li>
+            <b>Do: Today and Tomorrow.</b> The tasks you're actually working on. Only these can have
+            progress notes. Keep this list short and clean. A task's project is shown, but faintly,
+            because here the work matters more than where it fits.
+          </li>
+          <li>
+            <b>Plan: Someday.</b> Everything else. Capture as much as you like and organise it by
+            project; it's fine for this list to be long. Plan tasks aren't scheduled and aren't
+            worked on, but you can still rename them, change their priority or project, tick them
+            off, or delete them.
+          </li>
+        </ul>
+        <p>
+          <b>To start working on something, move it to Today or Tomorrow.</b> That's the moment you
+          commit to it, and it's when it can start collecting progress notes.
+        </p>
+      </section>
+
       <section id="horizons">
-        <h2>The four horizons</h2>
+        <h2>The three horizons</h2>
         <p>Every task sits on exactly one horizon, shown as a tab across the top of the list:</p>
         <ul class="horizons">
           <li><span class="dot d-today"></span><span><b>Today</b>: what you're committing to today.</span></li>
           <li><span class="dot d-tomorrow"></span><span><b>Tomorrow</b>: lined up for tomorrow.</span></li>
-          <li><span class="dot d-week"></span><span><b>Next Week</b>: on the radar for next week.</span></li>
-          <li><span class="dot d-someday"></span><span><b>Someday</b>: parked, with no date at all.</span></li>
+          <li><span class="dot d-someday"></span><span><b>Someday</b>: your plan. No date, grouped by project.</span></li>
         </ul>
+        <p>
+          The tabs are labelled <b>Do</b> (Today, Tomorrow) and <b>Plan</b> (Someday). There's no
+          Next Week: anything that far out is planning, so it belongs in Someday. Tasks that were on
+          Next Week have been moved to Someday.
+        </p>
         <p>
           Each horizon keeps its color everywhere in the app (tabs, buttons, dots), so you can tell
           where a task belongs at a glance. Color is used for nothing else.
@@ -189,7 +219,7 @@
             <thead><tr><th>Type</th><th>Sets</th><th>If you leave it out</th></tr></thead>
             <tbody>
               <tr>
-                <td><code>today</code> <code>tomorrow</code> <code>next week</code> <code>someday</code></td>
+                <td><code>today</code> <code>tomorrow</code> <code>someday</code><br />(<code>next week</code> also means Someday)</td>
                 <td>Horizon</td>
                 <td>Today</td>
               </tr>
@@ -225,16 +255,18 @@
           <li><b>Priority</b> is the three-bar signal on each task: more filled bars means higher priority. Click it to change the priority.</li>
           <li><b>Project chip</b>: click a task's <code>#CODE</code> to open that project.</li>
           <li>
-            <b>Progress notes</b>: click a task's 📝 button (it appears when you hover over the task)
-            to open its notes. Type what's happened and press Enter. Each note is stamped with the
-            date and time, and the newest shows first. Notes can't be edited or deleted once
-            added. A task with notes always shows 📝 and how many it has.
+            <b>Progress notes</b> (Today and Tomorrow only): click a task's 📝 button (it appears
+            when you hover over the task) to open its notes. Type what's happened and press Enter.
+            Each note is stamped with the date and time, and the newest shows first. Notes can't be
+            edited or deleted once added. A task with notes always shows 📝 and how many it has. If
+            you move it to Someday, its notes are kept and you can still read them; you can add more
+            once it's back on Today or Tomorrow.
           </li>
           <li>
             <b>Search, filter and sort</b> sit above the list. You can search descriptions, filter by
             priority or project (including “No project”), and sort by Priority, Alphabetical or
             Project. Whatever the sort, open tasks always come first, then deferred ones, then done
-            ones. These settings apply across all four tabs and reset when you reload.
+            ones. These settings apply across all three tabs and reset when you reload.
           </li>
         </ul>
       </section>
@@ -242,8 +274,8 @@
       <section id="rescheduling">
         <h2>Rescheduling</h2>
         <p>
-          Each task row shows three colored buttons, one for each horizon the task isn't on
-          (<b>Tdy</b>, <b>Tmrw</b>, <b>Wk</b>, <b>Someday</b>). One click moves it there.
+          Each task row shows two colored buttons, one for each horizon the task isn't on
+          (<b>Tdy</b>, <b>Tmrw</b>, <b>Someday</b>). One click moves it there.
         </p>
         <ul>
           <li>
@@ -263,8 +295,10 @@
       <section id="someday">
         <h2>Someday</h2>
         <p>
-          Someday is for things with no date. Nothing ever moves a Someday task onto a dated list
-          automatically. It leaves Someday only when you schedule it yourself.
+          Someday is your plan: things with no date. The list is grouped by project, with tasks that
+          have no project at the bottom; click a project's name to open it. Nothing ever moves a
+          Someday task onto Today or Tomorrow automatically. It leaves Someday only when you move it
+          yourself.
         </p>
         <p>
           While any Someday tasks exist, the sidebar shows an <b>“N in Someday”</b> box; click its

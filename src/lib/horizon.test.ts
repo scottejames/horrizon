@@ -9,7 +9,7 @@ describe("isDeferral", () => {
 
   it("treats a move to an earlier horizon as scheduling, not deferral", () => {
     expect(isDeferral("tomorrow", "today")).toBe(false);
-    expect(isDeferral("week", "tomorrow")).toBe(false);
-    expect(isDeferral("someday", "week")).toBe(false);
+    expect(isDeferral("someday", "tomorrow")).toBe(false);
+    expect(isDeferral("someday", "today")).toBe(false);
   });
 });

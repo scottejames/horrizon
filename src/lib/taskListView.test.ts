@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { Project, Task } from "../types";
-import { DEFAULT_TASK_FILTER, filterTasks, isFilterActive, sortTasks } from "./taskListView";
+import {
+  DEFAULT_TASK_FILTER,
+  filterTasks,
+  groupByProject,
+  isFilterActive,
+  sortTasks,
+} from "./taskListView";
 
 function task(overrides: Partial<Task>): Task {
   return {
@@ -134,5 +140,35 @@ describe("sortTasks", () => {
     ];
     const result = sortTasks(tasks, "project", projectsById);
     expect(result.map((t) => t.id)).toEqual(["high", "low"]);
+  });
+});
+
+describe("groupByProject", () => {
+  const home = project({ id: "p-home", shortCode: "HOME", name: "Home" });
+  const car = project({ id: "p-car", shortCode: "CAR", name: "Car" });
+  const projectsById = new Map([home, car].map((p) => [p.id, p]));
+
+  it("orders groups by short code, puts unassigned last, and keeps task order within a group", () => {
+    const tasks = [
+      task({ description: "Paint fence", projectId: "p-home" }),
+      task({ description: "Loose idea" }),
+      task({ description: "MOT", projectId: "p-car" }),
+      task({ description: "Fix gutter", projectId: "p-home" }),
+    ];
+
+    const groups = groupByProject(tasks, projectsById);
+
+    expect(groups.map((g) => g.project?.shortCode ?? "none")).toEqual(["CAR", "HOME", "none"]);
+    expect(groups[1].tasks.map((t) => t.description)).toEqual(["Paint fence", "Fix gutter"]);
+  });
+
+  it("treats a task whose project was deleted as unassigned", () => {
+    const groups = groupByProject(
+      [task({ description: "Orphan", projectId: "gone" })],
+      projectsById,
+    );
+    expect(groups).toEqual([
+      { project: undefined, tasks: [expect.objectContaining({ description: "Orphan" })] },
+    ]);
   });
 });

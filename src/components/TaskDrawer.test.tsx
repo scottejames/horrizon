@@ -30,6 +30,17 @@ vi.mock("../lib/dataClient", () => ({
                     { at: "2026-10-07T09:00:00.000Z", text: "Booked for Friday" },
                   ]),
                 },
+                {
+                  id: "task-2",
+                  description: "Redo the bathroom",
+                  priority: "low",
+                  horizon: "someday",
+                  state: "open",
+                  commitment: "personal",
+                  notes: JSON.stringify([
+                    { at: "2026-10-01T09:00:00.000Z", text: "Got two quotes" },
+                  ]),
+                },
               ],
             });
             return { unsubscribe: vi.fn() };
@@ -43,10 +54,10 @@ vi.mock("../lib/dataClient", () => ({
   },
 }));
 
-function renderDrawer() {
+function renderDrawer(taskId = "task-1") {
   return render(
     <TaskStoreProvider>
-      <TaskDrawer taskId="task-1" onClose={vi.fn()} />
+      <TaskDrawer taskId={taskId} onClose={vi.fn()} />
     </TaskStoreProvider>,
   );
 }
@@ -94,5 +105,21 @@ describe("TaskDrawer", () => {
 
     expect(screen.getByRole("button", { name: "Add" })).toBeDisabled();
     expect(updateMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps a Someday task's notes visible but read-only, and offers to move it into Do", async () => {
+    const user = userEvent.setup();
+    renderDrawer("task-2");
+
+    expect(screen.getByText("Got two quotes")).toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: "Progress note" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Move to Today" }));
+
+    expect(updateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "task-2", horizon: "today" }),
+    );
+    expect(screen.getByRole("textbox", { name: "Progress note" })).toBeInTheDocument();
+    expect(screen.getByText("Got two quotes")).toBeInTheDocument();
   });
 });

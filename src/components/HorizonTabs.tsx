@@ -1,5 +1,5 @@
-import type { KeyboardEvent } from "react";
-import { HORIZON_LABEL, HORIZON_ORDER } from "../lib/horizon";
+import { Fragment, type KeyboardEvent } from "react";
+import { HORIZON_LABEL, HORIZON_ORDER, isDoHorizon } from "../lib/horizon";
 import type { Horizon } from "../types";
 
 interface HorizonTabsProps {
@@ -24,19 +24,34 @@ export function HorizonTabs({ active, counts, onChange }: HorizonTabsProps) {
       aria-label="Schedule horizon"
       onKeyDown={handleKeyDown}
     >
-      {HORIZON_ORDER.map((horizon) => (
-        <button
-          key={horizon}
-          type="button"
-          role="tab"
-          aria-selected={horizon === active}
-          data-horizon={horizon}
-          className={`tab${horizon === active ? " active" : ""}`}
-          onClick={() => onChange(horizon)}
-        >
-          {HORIZON_LABEL[horizon]} <span className="count">{counts[horizon]}</span>
-        </button>
-      ))}
+      {HORIZON_ORDER.map((horizon, index) => {
+        // A group label goes in front of the first tab of each mode. It's
+        // decorative: each tab's own name already says where it goes.
+        const startsGroup =
+          index === 0 || isDoHorizon(HORIZON_ORDER[index - 1]) !== isDoHorizon(horizon);
+        return (
+          <Fragment key={horizon}>
+            {startsGroup && (
+              <span
+                className={`tab-group-label${index > 0 ? " tab-group-label--split" : ""}`}
+                aria-hidden="true"
+              >
+                {isDoHorizon(horizon) ? "Do" : "Plan"}
+              </span>
+            )}
+            <button
+              type="button"
+              role="tab"
+              aria-selected={horizon === active}
+              data-horizon={horizon}
+              className={`tab${horizon === active ? " active" : ""}`}
+              onClick={() => onChange(horizon)}
+            >
+              {HORIZON_LABEL[horizon]} <span className="count">{counts[horizon]}</span>
+            </button>
+          </Fragment>
+        );
+      })}
     </nav>
   );
 }

@@ -13,9 +13,26 @@ export function toPriority(value: string): Priority {
 }
 
 export function toHorizon(value: string): Horizon {
-  return value === "today" || value === "tomorrow" || value === "week" || value === "someday"
-    ? value
-    : "today";
+  // "week" was a horizon until 2026-10-08; it's planning now, so it reads as Someday.
+  if (value === "week") return "someday";
+  return value === "today" || value === "tomorrow" || value === "someday" ? value : "today";
+}
+
+/**
+ * The backend write that moves a row off the retired "week" horizon, or
+ * `null` if it needs none. Reading already maps "week" to Someday (see
+ * `toHorizon`); this makes the stored row match, so the legacy value
+ * doesn't linger forever. A "deferred from Next Week" tag has no
+ * equivalent any more and is dropped — the task itself is untouched.
+ */
+export function legacyHorizonFix(row: {
+  horizon: string;
+  deferredFrom?: string | null;
+}): { horizon?: Horizon; deferredFrom?: null } | null {
+  const fix: { horizon?: Horizon; deferredFrom?: null } = {};
+  if (row.horizon === "week") fix.horizon = "someday";
+  if (row.deferredFrom === "week") fix.deferredFrom = null;
+  return Object.keys(fix).length > 0 ? fix : null;
 }
 
 export function toTaskState(value: string): TaskState {

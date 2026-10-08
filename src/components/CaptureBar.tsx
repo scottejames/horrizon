@@ -76,7 +76,7 @@ export function CaptureBar({ activeCommitment, onAdded }: CaptureBarProps) {
       </div>
       <p className="capture-hint">
         <b>!high !med !low</b> priority &middot; <b>#code</b> project &middot;{" "}
-        <b>today / tomorrow / next week / someday</b> schedule &middot; <b>@personal / @work</b>{" "}
+        <b>today / tomorrow / someday</b> schedule &middot; <b>@personal / @work</b>{" "}
         &mdash; type any mix, parsed live below
       </p>
       <div className="parse-preview">

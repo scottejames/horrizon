@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { useProjectStore } from "../context/ProjectStoreContext";
 import { useTaskStore } from "../context/TaskStoreContext";
-import { HORIZON_INTRO, isDeferral } from "../lib/horizon";
-import { DEFAULT_TASK_FILTER, filterTasks, sortTasks } from "../lib/taskListView";
+import { HORIZON_INTRO, isDeferral, isDoHorizon } from "../lib/horizon";
+import { DEFAULT_TASK_FILTER, filterTasks, groupByProject, sortTasks } from "../lib/taskListView";
 import type { TaskListFilter, TaskSortMode } from "../lib/taskListView";
 import type { Commitment, Horizon, Task } from "../types";
 import { TaskListControls } from "./TaskListControls";
@@ -45,6 +45,24 @@ export function TaskList({
     onMoved(target, isDeferral(task.horizon, target));
   }
 
+  // In a Plan group the heading already names the project, so rows don't repeat it.
+  function renderRow(task: Task, showProject: boolean) {
+    return (
+      <TaskRow
+        key={task.id}
+        task={task}
+        project={showProject && task.projectId ? projectsById.get(task.projectId) : undefined}
+        onToggleDone={() => toggleDone(task.id)}
+        onMove={(target) => handleMove(task, target)}
+        onRename={(description) => updateDescription(task.id, description)}
+        onChangePriority={(priority) => updatePriority(task.id, priority)}
+        onDelete={() => deleteTask(task.id)}
+        onOpenProject={onOpenProject}
+        onOpenNotes={() => onOpenTaskNotes(task.id)}
+      />
+    );
+  }
+
   return (
     <>
       <p className="panel-intro">{HORIZON_INTRO[horizon]}</p>
@@ -66,23 +84,35 @@ export function TaskList({
             Clear filters
           </button>
         </p>
-      ) : (
-        <ul className="task-list">
-          {visibleTasks.map((task) => (
-            <TaskRow
-              key={task.id}
-              task={task}
-              project={projects.find((project) => project.id === task.projectId)}
-              onToggleDone={() => toggleDone(task.id)}
-              onMove={(target) => handleMove(task, target)}
-              onRename={(description) => updateDescription(task.id, description)}
-              onChangePriority={(priority) => updatePriority(task.id, priority)}
-              onDelete={() => deleteTask(task.id)}
-              onOpenProject={onOpenProject}
-              onOpenNotes={() => onOpenTaskNotes(task.id)}
-            />
-          ))}
+      ) : isDoHorizon(horizon) ? (
+        <ul className="task-list task-list--do">
+          {visibleTasks.map((task) => renderRow(task, true))}
         </ul>
+      ) : (
+        groupByProject(visibleTasks, projectsById).map(({ project, tasks: groupTasks }) => (
+          <section
+            key={project?.id ?? "unassigned"}
+            className="plan-group"
+            aria-label={project ? project.name : "No project"}
+          >
+            <h3 className="plan-group-title">
+              {project ? (
+                <button
+                  type="button"
+                  className="plan-group-link"
+                  onClick={() => onOpenProject(project.id)}
+                >
+                  <span className="chip-project">#{project.shortCode}</span>
+                  {project.name}
+                </button>
+              ) : (
+                "No project"
+              )}
+              <span className="count">{groupTasks.length}</span>
+            </h3>
+            <ul className="task-list">{groupTasks.map((task) => renderRow(task, false))}</ul>
+          </section>
+        ))
       )}
     </>
   );

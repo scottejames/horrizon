@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useTaskStore } from "../context/TaskStoreContext";
-import { HORIZON_LABEL } from "../lib/horizon";
+import { DO_HORIZONS, HORIZON_LABEL, isDoHorizon } from "../lib/horizon";
 import type { Task } from "../types";
 import { Drawer } from "./Drawer";
 
@@ -60,6 +60,39 @@ function ProgressNoteInput({ task }: ProgressNoteInputProps) {
   );
 }
 
+interface PlanNoticeProps {
+  task: Task;
+}
+
+/**
+ * Shown instead of the note input on a Plan (Someday) task: notes are for
+ * work, and work happens in the Do window. Any existing notes stay visible
+ * below, since moving a task back to planning must never lose them.
+ */
+function PlanNotice({ task }: PlanNoticeProps) {
+  const { moveTask } = useTaskStore();
+  return (
+    <div className="drawer-plan-notice">
+      <p>
+        This task is in your plan, not your Do list. Move it to Today or Tomorrow to start adding
+        progress.
+      </p>
+      <div className="drawer-plan-actions">
+        {DO_HORIZONS.map((horizon) => (
+          <button
+            key={horizon}
+            type="button"
+            className={`reschedule-btn rb-${horizon}`}
+            onClick={() => moveTask(task.id, horizon)}
+          >
+            Move to {HORIZON_LABEL[horizon]}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function TaskDrawer({ taskId, onClose }: TaskDrawerProps) {
   const { tasks } = useTaskStore();
   const task = taskId ? tasks.find((item) => item.id === taskId) : undefined;
@@ -85,12 +118,18 @@ export function TaskDrawer({ taskId, onClose }: TaskDrawerProps) {
               {task.description}
             </h2>
           </div>
-          <ProgressNoteInput key={task.id} task={task} />
+          {isDoHorizon(task.horizon) ? (
+            <ProgressNoteInput key={task.id} task={task} />
+          ) : (
+            <PlanNotice task={task} />
+          )}
           <div className="drawer-narrative drawer-notes">
             <h3 className="drawer-section-title">Progress</h3>
             {task.notes.length === 0 ? (
               <p className="drawer-narrative-empty">
-                No progress notes yet. Add one above whenever something moves.
+                {isDoHorizon(task.horizon)
+                  ? "No progress notes yet. Add one above whenever something moves."
+                  : "No progress notes yet."}
               </p>
             ) : (
               <ol className="task-notes" reversed>

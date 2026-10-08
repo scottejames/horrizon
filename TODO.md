@@ -39,12 +39,10 @@ Raised reviewing a real screenshot of the Areas of Responsibility tree
         isolation.
 
 - [ ] **Automatic day rollover.** Nothing moves tasks when the date
-      changes: Tomorrow tasks stay on Tomorrow (and Next Week on Next Week)
-      until moved by hand. Confirmed 2026-10-08 as a missing feature, not
+      changes: Tomorrow tasks stay on Tomorrow until moved by hand. Confirmed 2026-10-08 as a missing feature, not
       intended behavior. Needs decisions before building: does an unfinished
       Today task roll forward or stay put (see the Sunsama-style start-of-day
-      review idea below — these may be the same feature), what "next week"
-      means as a date boundary, and whether it runs client-side on load
+      review idea below — these may be the same feature), and whether it runs client-side on load
       (like the completed-task purge) or as a scheduled backend job. The
       help page (`public/help.html`) and the Tomorrow tab's intro currently
       say rollover is manual — update both when this ships.
@@ -62,7 +60,8 @@ Raised reviewing a real screenshot of the Areas of Responsibility tree
          opens from a task and shows the log plus an "add progress note"
          input. `TaskRow` gets a small indicator (e.g. a note count or
          `2/5`) so tasks with detail stand out in the list.
-      2. **Checklist.** `checklist: a.json()` array of `{ id, text, done }`
+      2. **Checklist.** Do-window tasks only, same rule as notes (see
+         design-principles.md's "Plan vs Do"). `checklist: a.json()` array of `{ id, text, done }`
          on `Task`, shown in the same drawer. Items are plain steps with no
          horizon, priority, or commitment of their own.
       3. **Promote to project.** Once a step needs its own schedule, it's a
@@ -87,6 +86,20 @@ Raised reviewing a real screenshot of the Areas of Responsibility tree
       design-principles.md "Completed tasks fade into a project's
       narrative" entry. Same client-side-timer limitation applies.
       Raised 2026-10-08; not started.
+
+- [ ] **Phone layout: header overlaps itself and the page scrolls
+      sideways.** At 390px the Personal/Work toggle, date, Help and Sign out
+      pile on top of each other, and the page is ~24px wider than the screen.
+      Already the case before 2026-10-08 (checked against the previous
+      commit), not caused by the Plan/Do or notes work. Spotted in
+      screenshots on 2026-10-08.
+- [ ] **Native `<select>` dropdowns and Chrome on Wayland.** On 2026-10-08
+      opening the project filter showed a large white popup, and a few clicks
+      later all of Chrome crashed (Flatpak Chrome 155, Wayland, SIGILL in the
+      browser process). A plain `<select>` popup is drawn by Chrome, not the
+      page, so this is a browser bug, not Horizon's. Only worth replacing
+      the three list-control dropdowns with in-page ones if it keeps
+      happening.
 
 ## Later — features worth considering (researched 2026-07-30)
 

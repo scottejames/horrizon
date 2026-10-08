@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toTaskNotes } from "./guards";
+import { legacyHorizonFix, toHorizon, toTaskNotes } from "./guards";
 
 describe("toTaskNotes", () => {
   const note = { at: "2026-10-08T09:00:00.000Z", text: "Emailed supplier" };
@@ -21,5 +21,28 @@ describe("toTaskNotes", () => {
     expect(toTaskNotes([note, { at: 1, text: "bad" }, "junk", null])).toEqual([note]);
     expect(toTaskNotes("{not json")).toEqual([]);
     expect(toTaskNotes('{"at":"x","text":"not an array"}')).toEqual([]);
+  });
+});
+
+describe("legacy Next Week horizon", () => {
+  it("reads a stored 'week' horizon as Someday", () => {
+    expect(toHorizon("week")).toBe("someday");
+  });
+
+  it("moves a Next Week row to Someday without touching anything else", () => {
+    expect(legacyHorizonFix({ horizon: "week", deferredFrom: "today" })).toEqual({
+      horizon: "someday",
+    });
+  });
+
+  it("drops a 'deferred from Next Week' tag, which has no equivalent any more", () => {
+    expect(legacyHorizonFix({ horizon: "someday", deferredFrom: "week" })).toEqual({
+      deferredFrom: null,
+    });
+  });
+
+  it("leaves current rows alone", () => {
+    expect(legacyHorizonFix({ horizon: "tomorrow", deferredFrom: "today" })).toBeNull();
+    expect(legacyHorizonFix({ horizon: "today", deferredFrom: null })).toBeNull();
   });
 });

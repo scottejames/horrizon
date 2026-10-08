@@ -12,7 +12,8 @@ export interface ParsedQuickAdd {
 }
 
 const SCHEDULE_PATTERNS: [RegExp, Horizon][] = [
-  [/\bnext\s*week\b/i, "week"],
+  // "next week" is beyond the Do window, so it's planning: it lands in Someday.
+  [/\bnext\s*week\b/i, "someday"],
   [/\btomorrow\b/i, "tomorrow"],
   [/\bsomeday\b/i, "someday"],
   [/\btoday\b/i, "today"],
@@ -33,7 +34,7 @@ const PROJECT_PATTERN = /#([A-Za-z0-9]+)/;
 
 /**
  * Extracts priority (`!high`/`!med`/`!low`), project (`#code`), schedule
- * (today/tomorrow/next week/someday), and commitment (`@work`/`@personal`)
+ * (today/tomorrow/someday, with "next week" treated as someday), and commitment (`@work`/`@personal`)
  * from a single free-text entry — see design/design-principles.md's
  * "Quick-add is one free-text field" decision. Defaults to today's horizon
  * when no schedule keyword is present, matching the app's core premise:

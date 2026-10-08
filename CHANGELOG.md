@@ -6,6 +6,24 @@ kept current.
 
 ## 2026-10-08
 
+### Changed
+
+- **Plan vs Do.** Horizon now separates planning from doing (see
+  design-principles.md's "Plan vs Do" entry). Today and Tomorrow are the
+  Do window: only tasks there can take progress notes, and the project chip
+  on their rows is toned down so the work reads first. Someday is the Plan:
+  it's now grouped by project (unassigned last, headings open the project).
+  The tabs carry small "Do" / "Plan" labels with a divider between them.
+- **Next Week removed.** A dated horizon beyond the Do window contradicted
+  "the plan isn't scheduled". Existing Next Week tasks are moved to Someday
+  when the app loads (one write per task, guarded so it's never sent
+  twice), and `next week` in quick-add now means Someday. Nothing is
+  deleted; only a "deferred from Next Week" tag, which has no equivalent
+  now, is dropped.
+- A Someday task that already has progress notes keeps them, still shows
+  the 📝 count, and opens them read-only, with "Move to Today/Tomorrow"
+  buttons in the drawer to start working on it again.
+
 ### Added
 
 - Progress notes on tasks. A 📝 button on each task row opens a task drawer
