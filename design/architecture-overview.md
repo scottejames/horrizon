@@ -39,6 +39,9 @@ header's Personal/Work toggle. See `design-principles.md`'s "Personal/Work
 is a second, independent filter" entry for why it's independent rather than
 derived, and how the frontend still defaults it sensibly at creation time.
 
+`Task.breakdown` (`String`, added 2026-10-08) is free text the user
+structures however they like. Absent on older rows, read as `""`.
+
 `Task.notes` (`AWSJSON`, added 2026-10-08) is a task's progress log, an
 array of `{ at, text }` kept on the Task row itself rather than in a
 separate model. It's written as a JSON string (`a.json()` fields require

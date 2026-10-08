@@ -38,14 +38,12 @@ Raised reviewing a real screenshot of the Areas of Responsibility tree
         it together with the real review mechanism above, not in
         isolation.
 
-- [ ] **Automatic day rollover.** Nothing moves tasks when the date
-      changes: Tomorrow tasks stay on Tomorrow until moved by hand. Confirmed 2026-10-08 as a missing feature, not
-      intended behavior. Needs decisions before building: does an unfinished
-      Today task roll forward or stay put (see the Sunsama-style start-of-day
-      review idea below — these may be the same feature), and whether it runs client-side on load
-      (like the completed-task purge) or as a scheduled backend job. The
-      help page (`public/help.html`) and the Tomorrow tab's intro currently
-      say rollover is manual — update both when this ships.
+- [x] ~~**Automatic day rollover.**~~ **Rejected 2026-10-08.** Today and
+      Tomorrow are buckets meaning "now" and "next", not calendar days, and
+      moving work between them is a manual decision based on intent (see
+      design-principles.md's "Plan vs Do"). Moving tasks because the date
+      changed would contradict that. Don't reopen without revisiting that
+      principle first.
 
 - [ ] **Task notes: progress log, checklist, promote to project.** Lets a
       task hold notes so progress can be recorded and the task broken down
@@ -60,17 +58,20 @@ Raised reviewing a real screenshot of the Areas of Responsibility tree
          opens from a task and shows the log plus an "add progress note"
          input. `TaskRow` gets a small indicator (e.g. a note count or
          `2/5`) so tasks with detail stand out in the list.
-      2. **Checklist.** Do-window tasks only, same rule as notes (see
-         design-principles.md's "Plan vs Do"). `checklist: a.json()` array of `{ id, text, done }`
-         on `Task`, shown in the same drawer. Items are plain steps with no
-         horizon, priority, or commitment of their own.
+      2. ~~**Checklist.**~~ Shipped 2026-10-08 as a free-text **breakdown**
+         instead (see CHANGELOG): a structured checklist was dropped in
+         favour of free text you can shape however you like. Do-window
+         tasks only, same rule as notes.
       3. **Promote to project.** Once a step needs its own schedule, it's a
          real task, and Horizon already groups tasks with Projects. Don't
          add `parentTaskId` subtasks, which would duplicate Projects. Instead,
-         a "Promote to project" action creates a Project from the task,
-         turns unfinished checklist items into tasks in that project, and
-         copies the progress log into the project's narrative.
-      **Purge interaction:** a task's notes are deleted along with the
+         a "Promote to project" action creates a Project from the task and
+         copies the progress log into the project's narrative. The
+         breakdown is free text now, so it can't be turned into tasks
+         automatically: decide whether to offer "one task per line" (with a
+         chance to edit first) or just carry the text across as the
+         project's description.
+      **Purge interaction:** a task's notes and breakdown are deleted along with the
       task when the 24h purge runs. That loss is accepted for now and is
       resolved by the archive item below, not by special-casing notes.
 - [ ] **Archive completed tasks instead of deleting them at 24h.** Today a
@@ -147,6 +148,10 @@ building.
       pattern: each day opens with a deliberate pass over yesterday's
       unfinished Today items, asking you to explicitly reschedule/defer
       each one rather than letting them silently roll forward.
+      *Note 2026-10-08:* Today/Tomorrow aren't dates any more ("now" and
+      "next", see Plan vs Do), so a date-triggered prompt fits badly. If
+      this comes back, it should be a review you start yourself, not one
+      the calendar starts.
 - [ ] **Habit tracker** — TickTick's recurring daily check-off items,
       distinct from one-off tasks (a streak, not a to-do).
 - [ ] **A real AI-generated project narrative**, replacing the

@@ -9,15 +9,24 @@ future change, unless a real usage problem contradicts one.
 
 Added 2026-10-08. This is the idea the rest of the app is organised around.
 
-You can only actually *do* things over a short window. Beyond that you
-can plan, but the plan should stay high level. Horizon keeps the two apart:
+You can only actually *do* a limited amount at once. Beyond that you can
+plan, but the plan should stay high level. Horizon keeps the two apart:
 
 - **Do is Today and Tomorrow** (`DO_HORIZONS` in `src/lib/horizon.ts`).
   These are tasks you're working on. Only here does a task get progress
-  notes, and (when they ship) a checklist of steps. The Do list should stay
+  notes and a breakdown (free text, structured however you like). The Do list should stay
   clean and short. A task's project is shown, but toned down: near term,
   the focus is the work, not where it fits.
-- **Plan is Someday.** Everything beyond the Do window. Tasks here are
+- **Today and Tomorrow are buckets, not dates.** Today is what you should
+  be focused on now. Tomorrow is what comes next. Work is loaded into them
+  on purpose, and nothing moves between them, or into them, because the
+  calendar changed. A task stays on Today until you finish it or decide to
+  move it; a task on Tomorrow stays there until you choose to bring it
+  forward. The names are shorthand for "now" and "next", not the days of
+  the week. That's also why there's no automatic day rollover (rejected
+  2026-10-08, see `TODO.md`).
+- **Plan is Someday.** Everything beyond the Do window: work that's stored
+  but not being executed. Tasks here are
   captured and organised, but not scheduled and not worked on. The Plan
   view is allowed to be cluttered, so it's grouped by project to keep that
   clutter organised. Its natural shape is *projects broken down into tasks*.
@@ -467,3 +476,32 @@ without the task itself having to change.
   project narrative.** This was accepted on purpose (2026-10-08). The fix
   is the "archive instead of delete" item in `TODO.md`, not special-casing
   notes in the purge.
+
+## A task's breakdown is free text, not a checklist
+
+Added 2026-10-08. The plan was a checklist of `{ id, text, done }` steps.
+It was dropped before building in favour of one free-text field
+(`Task.breakdown`), because the user wanted to structure the breakdown
+however suits each task: steps, bullets, headings, open questions. A
+checklist forces one shape on everything.
+
+- **Plain text, shown as typed.** It's rendered with `white-space:
+  pre-wrap`, never as markdown or HTML (CODING_GUIDELINES.md: no
+  `dangerouslySetInnerHTML`). If markdown rendering is ever wanted, it needs
+  a sanitising renderer, not raw HTML.
+- **Saves itself.** There's no Save button: it writes 800ms after typing
+  pauses, immediately on blur, and on unmount (closing or switching the
+  drawer). That's one write per pause, not per keystroke. The unmount flush
+  matters because Escape closes the drawer without blurring the textarea.
+  `TaskDrawer.test.tsx` has a regression test for it that fails without the
+  flush. `updateBreakdown` in the store has stable identity
+  (`useCallback`) so that cleanup can safely call it.
+- **The whole field is replaced on each save.** If two devices edit the same
+  breakdown at the same time, the last save wins. An open drawer also
+  doesn't pick up an edit made on another device until it's reopened.
+  Acceptable for one user; revisit if that changes.
+- **Same Plan vs Do rule as notes.** Editable on Today/Tomorrow. On a
+  Someday task it's shown read-only, and only if it has content. The
+  task-row 📝 button stays visible for any task with a breakdown or notes.
+- **Not machine-readable.** Because it's free text, "promote to project"
+  can't reliably turn it into tasks. See `TODO.md`.

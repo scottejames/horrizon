@@ -138,8 +138,8 @@
 
       <h1>Horizon help</h1>
       <p class="lede">
-        Today's list, tomorrow's plan. Horizon sorts everything you mean to do by <em>when</em> you'll
-        do it, so the Today list stays short enough to actually finish.
+        Today's list, tomorrow's plan. Horizon keeps what you're working on <em>now</em> apart from
+        everything you've planned, so the Today list stays short enough to actually finish.
       </p>
 
       <nav class="toc" aria-label="Contents">
@@ -162,17 +162,16 @@
         <h2>Plan and Do</h2>
         <p>
           Horizon separates <b>planning</b> from <b>getting things done</b>. You can only really work
-          on things over a short window. Beyond that you can plan, but the plan should stay high
-          level.
+          on a few things at once. Beyond that you can plan, but the plan should stay high level.
         </p>
         <ul>
           <li>
             <b>Do: Today and Tomorrow.</b> The tasks you're actually working on. Only these can have
-            progress notes. Keep this list short and clean. A task's project is shown, but faintly,
+            a breakdown and progress notes. Keep this list short and clean. A task's project is shown, but faintly,
             because here the work matters more than where it fits.
           </li>
           <li>
-            <b>Plan: Someday.</b> Everything else. Capture as much as you like and organise it by
+            <b>Plan: Someday.</b> Everything else: work that's stored, but not being done. Capture as much as you like and organise it by
             project; it's fine for this list to be long. Plan tasks aren't scheduled and aren't
             worked on, but you can still rename them, change their priority or project, tick them
             off, or delete them.
@@ -180,7 +179,13 @@
         </ul>
         <p>
           <b>To start working on something, move it to Today or Tomorrow.</b> That's the moment you
-          commit to it, and it's when it can start collecting progress notes.
+          commit to it, and it's when you can break it down and record progress.
+        </p>
+        <p>
+          <b>Today and Tomorrow aren't calendar days.</b> Think of them as <b>now</b> and
+          <b>next</b>: Today is what you should be focused on right now, and Tomorrow is what comes
+          after that. They're buckets you load work into. Nothing moves in or out of them because the
+          date changed. Tasks only move when you move them, because you've decided to.
         </p>
       </section>
 
@@ -188,8 +193,8 @@
         <h2>The three horizons</h2>
         <p>Every task sits on exactly one horizon, shown as a tab across the top of the list:</p>
         <ul class="horizons">
-          <li><span class="dot d-today"></span><span><b>Today</b>: what you're committing to today.</span></li>
-          <li><span class="dot d-tomorrow"></span><span><b>Tomorrow</b>: lined up for tomorrow.</span></li>
+          <li><span class="dot d-today"></span><span><b>Today</b>: what you should be focused on now.</span></li>
+          <li><span class="dot d-tomorrow"></span><span><b>Tomorrow</b>: what comes next.</span></li>
           <li><span class="dot d-someday"></span><span><b>Someday</b>: your plan. No date, grouped by project.</span></li>
         </ul>
         <p>
@@ -202,8 +207,9 @@
           where a task belongs at a glance. Color is used for nothing else.
         </p>
         <p class="note">
-          Horizons don't roll over on their own yet. When tomorrow arrives, tasks on Tomorrow stay
-          there until you move them to Today yourself.
+          Nothing moves on its own when the date changes, and that's on purpose: Today and Tomorrow
+          mean "now" and "next", not dates. When you're ready to focus on something from Tomorrow,
+          move it to Today yourself.
         </p>
       </section>
 
@@ -255,12 +261,22 @@
           <li><b>Priority</b> is the three-bar signal on each task: more filled bars means higher priority. Click it to change the priority.</li>
           <li><b>Project chip</b>: click a task's <code>#CODE</code> to open that project.</li>
           <li>
-            <b>Progress notes</b> (Today and Tomorrow only): click a task's 📝 button (it appears
-            when you hover over the task) to open its notes. Type what's happened and press Enter.
-            Each note is stamped with the date and time, and the newest shows first. Notes can't be
-            edited or deleted once added. A task with notes always shows 📝 and how many it has. If
-            you move it to Someday, its notes are kept and you can still read them; you can add more
-            once it's back on Today or Tomorrow.
+            <b>Breakdown and progress</b> (Today and Tomorrow only): click a task's 📝 button (it
+            appears when you hover over the task) to open its details.
+            <ul>
+              <li>
+                <b>Breakdown</b> is a free-text box for splitting the task into whatever shape suits
+                it: steps, bullet points, questions to ask. It saves itself as you type.
+              </li>
+              <li>
+                <b>Progress</b> notes record what's happened. Type a note and press Enter. Each one is
+                stamped with the date and time, newest first, and can't be edited or deleted once
+                added.
+              </li>
+            </ul>
+            A task with a breakdown or notes always shows 📝 (with the number of notes). If you move
+            it to Someday, everything is kept and you can still read it; you can edit again once it's
+            back on Today or Tomorrow.
           </li>
           <li>
             <b>Search, filter and sort</b> sit above the list. You can search descriptions, filter by
@@ -352,7 +368,7 @@
         <p>
           A done task stays visible for 24 hours, then it's deleted for good. If it belonged to a
           project, a line recording it is added to that project's <b>Progress</b> summary first, so
-          the record isn't lost. A task's progress notes are deleted along with it and are
+          the record isn't lost. A task's breakdown and progress notes are deleted along with it and are
           <b>not</b> copied into the project's summary, so copy out anything you want to keep
           before then. Once a day the summary condenses older entries into a single running
           total, so it stays short.

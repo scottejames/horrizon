@@ -31,6 +31,8 @@ interface TaskStoreValue {
   updateDescription: (id: string, description: string) => void;
   updatePriority: (id: string, priority: Priority) => void;
   addTaskNote: (id: string, text: string) => void;
+  /** Stable identity, so an editor can flush a pending save from an unmount cleanup. */
+  updateBreakdown: (id: string, breakdown: string) => void;
   deleteTask: (id: string) => void;
   /** Bulk delete, used by the narrative-maintenance purge. */
   deleteTasks: (ids: string[]) => void;
@@ -76,6 +78,7 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
                 : undefined,
             projectId: item.projectId ?? undefined,
             completedAt: item.completedAt ?? undefined,
+            breakdown: item.breakdown ?? "",
             notes: toTaskNotes(item.notes),
           })),
         );
@@ -102,7 +105,7 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
 
   function addTask(input: AddTaskInput) {
     const id = crypto.randomUUID();
-    const task: Task = { id, state: "open", notes: [], ...input };
+    const task: Task = { id, state: "open", breakdown: "", notes: [], ...input };
     setTasks((prev) => [...prev, task]);
     client.models.Task.create({
       id,
@@ -146,6 +149,13 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
     // a.json() fields must be sent as a JSON string, not a plain array.
     client.models.Task.update({ id, notes: JSON.stringify(notes) }).catch(console.error);
   }
+
+  // Same stable-identity reasoning as deleteTasks below: only closes over
+  // setTasks and the module-level client.
+  const updateBreakdown = useCallback((id: string, breakdown: string) => {
+    setTasks((prev) => prev.map((task) => (task.id === id ? { ...task, breakdown } : task)));
+    client.models.Task.update({ id, breakdown }).catch(console.error);
+  }, []);
 
   function deleteTask(id: string) {
     setTasks((prev) => prev.filter((task) => task.id !== id));
@@ -209,6 +219,7 @@ export function TaskStoreProvider({ children }: { children: ReactNode }) {
         updateDescription,
         updatePriority,
         addTaskNote,
+        updateBreakdown,
         deleteTask,
         deleteTasks,
         unlinkTasksFromProject,

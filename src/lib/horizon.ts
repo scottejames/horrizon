@@ -44,8 +44,9 @@ export const HORIZON_SHORT_LABEL: Record<Horizon, string> = {
 };
 
 export const HORIZON_INTRO: Record<Horizon, string> = {
-  today: "Everything you're committing to today.",
-  tomorrow: "Lined up for tomorrow. These don't move to Today on their own yet — bring them over when the day comes.",
+  today: "What you should be focused on right now.",
+  tomorrow:
+    "What comes next. Nothing moves to Today on its own: bring a task over when you're ready to focus on it.",
   someday:
     "Your plan: everything you're not doing yet, grouped by project. It can be as cluttered as it needs to be. When you're ready to work on something, send it to Today or Tomorrow.",
 };

@@ -1,6 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TaskStoreProvider } from "../context/TaskStoreContext";
 import { TaskDrawer } from "./TaskDrawer";
 
@@ -37,6 +37,7 @@ vi.mock("../lib/dataClient", () => ({
                   horizon: "someday",
                   state: "open",
                   commitment: "personal",
+                  breakdown: "Strip tiles\nReplumb shower\n  - check the stopcock first",
                   notes: JSON.stringify([
                     { at: "2026-10-01T09:00:00.000Z", text: "Got two quotes" },
                   ]),
@@ -121,5 +122,56 @@ describe("TaskDrawer", () => {
     );
     expect(screen.getByRole("textbox", { name: "Progress note" })).toBeInTheDocument();
     expect(screen.getByText("Got two quotes")).toBeInTheDocument();
+  });
+
+  describe("breakdown", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    function breakdownCalls() {
+      return updateMock.mock.calls.filter(([input]) => "breakdown" in input);
+    }
+
+    it("saves once when typing pauses, not on every keystroke", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      renderDrawer();
+
+      await user.type(screen.getByRole("textbox", { name: "Breakdown" }), "Clear cupboard");
+      expect(breakdownCalls()).toHaveLength(0);
+
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(breakdownCalls()).toEqual([[{ id: "task-1", breakdown: "Clear cupboard" }]]);
+    });
+
+    it("saves straight away on blur", async () => {
+      const user = userEvent.setup();
+      renderDrawer();
+
+      await user.type(screen.getByRole("textbox", { name: "Breakdown" }), "Book parking");
+      await user.tab();
+
+      expect(breakdownCalls()).toEqual([[{ id: "task-1", breakdown: "Book parking" }]]);
+    });
+
+    it("doesn't drop pending text if the drawer goes away before the save delay", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      const { unmount } = renderDrawer();
+
+      await user.type(screen.getByRole("textbox", { name: "Breakdown" }), "Last words");
+      unmount();
+
+      expect(breakdownCalls()).toEqual([[{ id: "task-1", breakdown: "Last words" }]]);
+    });
+
+    it("shows a Someday task's breakdown read-only, keeping its line breaks", () => {
+      renderDrawer("task-2");
+
+      expect(screen.queryByRole("textbox", { name: "Breakdown" })).not.toBeInTheDocument();
+      const text = screen.getByText(/Strip tiles/);
+      expect(text.textContent).toBe("Strip tiles\nReplumb shower\n  - check the stopcock first");
+    });
   });
 });

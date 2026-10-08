@@ -1492,6 +1492,40 @@ details.drawer-move[open] summary {
   margin-top: 8px;
   overflow-wrap: anywhere;
 }
+.drawer-breakdown {
+  margin-bottom: 16px;
+}
+/* Grows with its content (where field-sizing is supported) up to a cap,
+   so a long breakdown scrolls inside itself instead of pushing the
+   progress log out of the drawer. */
+.drawer-breakdown-input {
+  display: block;
+  width: 100%;
+  min-height: 7.5em;
+  max-height: 40vh;
+  field-sizing: content;
+  resize: vertical;
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 9px 12px;
+}
+.drawer-breakdown-input:focus-visible {
+  border-color: var(--accent);
+}
+.drawer-breakdown-text {
+  margin: 0;
+  max-height: 40vh;
+  overflow-y: auto;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 .drawer-notes {
   flex: 1;
   overflow-y: auto;

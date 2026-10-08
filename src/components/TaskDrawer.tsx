@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useTaskStore } from "../context/TaskStoreContext";
 import { DO_HORIZONS, HORIZON_LABEL, isDoHorizon } from "../lib/horizon";
 import type { Task } from "../types";
@@ -17,6 +17,56 @@ function formatNoteTime(iso: string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+/** How long typing has to pause before the breakdown is saved. */
+const BREAKDOWN_SAVE_DELAY_MS = 800;
+
+interface BreakdownProps {
+  task: Task;
+}
+
+/**
+ * Free text rather than a checklist, so the breakdown can take whatever
+ * shape suits the task. Saves after a pause in typing rather than on every
+ * keystroke (one write per pause, not per character), and flushes any
+ * pending save on blur and on unmount, so closing the drawer or switching
+ * task never drops the last few words. Remounted per task via `key`.
+ */
+function BreakdownEditor({ task }: BreakdownProps) {
+  const { updateBreakdown } = useTaskStore();
+  const [draft, setDraft] = useState(task.breakdown);
+  const draftRef = useRef(task.breakdown);
+  const savedRef = useRef(task.breakdown);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const taskId = task.id;
+
+  const save = useCallback(() => {
+    clearTimeout(timerRef.current);
+    if (draftRef.current === savedRef.current) return;
+    savedRef.current = draftRef.current;
+    updateBreakdown(taskId, draftRef.current);
+  }, [taskId, updateBreakdown]);
+
+  useEffect(() => save, [save]);
+
+  function handleChange(value: string) {
+    setDraft(value);
+    draftRef.current = value;
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(save, BREAKDOWN_SAVE_DELAY_MS);
+  }
+
+  return (
+    <textarea
+      className="drawer-breakdown-input"
+      aria-label="Breakdown"
+      placeholder="Break this down however suits you: steps, bullets, open questions…"
+      value={draft}
+      onChange={(event) => handleChange(event.target.value)}
+      onBlur={save}
+    />
+  );
 }
 
 interface ProgressNoteInputProps {
@@ -65,17 +115,18 @@ interface PlanNoticeProps {
 }
 
 /**
- * Shown instead of the note input on a Plan (Someday) task: notes are for
- * work, and work happens in the Do window. Any existing notes stay visible
- * below, since moving a task back to planning must never lose them.
+ * Shown on a Plan (Someday) task in place of the editing controls: notes
+ * and breakdowns are for work, and work happens in the Do window. Anything
+ * already written stays visible below, since moving a task back to
+ * planning must never lose it.
  */
 function PlanNotice({ task }: PlanNoticeProps) {
   const { moveTask } = useTaskStore();
   return (
     <div className="drawer-plan-notice">
       <p>
-        This task is in your plan, not your Do list. Move it to Today or Tomorrow to start adding
-        progress.
+        This task is in your plan, not your Do list. Move it to Today or Tomorrow to break it down
+        and add progress.
       </p>
       <div className="drawer-plan-actions">
         {DO_HORIZONS.map((horizon) => (
@@ -105,7 +156,7 @@ export function TaskDrawer({ taskId, onClose }: TaskDrawerProps) {
       isOpen={isOpen}
       onClose={onClose}
       labelledBy="taskDrawerTitle"
-      closeLabel="Close task notes"
+      closeLabel="Close task details"
     >
       {task && (
         <>
@@ -118,11 +169,20 @@ export function TaskDrawer({ taskId, onClose }: TaskDrawerProps) {
               {task.description}
             </h2>
           </div>
-          {isDoHorizon(task.horizon) ? (
-            <ProgressNoteInput key={task.id} task={task} />
-          ) : (
-            <PlanNotice task={task} />
+          {!isDoHorizon(task.horizon) && <PlanNotice task={task} />}
+          {/* On a Plan task the breakdown is shown read-only, and only if
+              there is one: moving back to planning must never hide work. */}
+          {(isDoHorizon(task.horizon) || task.breakdown) && (
+            <div className="drawer-breakdown">
+              <h3 className="drawer-section-title">Breakdown</h3>
+              {isDoHorizon(task.horizon) ? (
+                <BreakdownEditor key={task.id} task={task} />
+              ) : (
+                <p className="drawer-breakdown-text">{task.breakdown}</p>
+              )}
+            </div>
           )}
+          {isDoHorizon(task.horizon) && <ProgressNoteInput key={task.id} task={task} />}
           <div className="drawer-narrative drawer-notes">
             <h3 className="drawer-section-title">Progress</h3>
             {task.notes.length === 0 ? (

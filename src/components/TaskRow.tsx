@@ -45,6 +45,8 @@ export function TaskRow({
   const rename = useInlineRename(task.description, onRename, renameInputRef);
   const requestConfirm = useConfirm();
   const noteCount = task.notes.length;
+  const hasDetail = noteCount > 0 || task.breakdown !== "";
+  const noteSuffix = noteCount > 0 ? ` (${noteCount} note${noteCount === 1 ? "" : "s"})` : "";
   const rescheduleTargets = HORIZON_ORDER.filter((horizon) => horizon !== task.horizon);
 
   function handleChangePriority(priority: Priority) {
@@ -122,14 +124,14 @@ export function TaskRow({
           </button>
         </>
       )}
-      {/* Notes are for work in the Do window. A Plan task keeps (and shows)
-          any notes it already has, but doesn't invite new ones. */}
-      {(isDoHorizon(task.horizon) || noteCount > 0) && (
+      {/* Breakdowns and notes are for work in the Do window. A Plan task
+          keeps (and shows) any it already has, but doesn't invite new ones. */}
+      {(isDoHorizon(task.horizon) || hasDetail) && (
         <button
           type="button"
-          className={`notes-btn${noteCount > 0 ? " has-notes" : ""}`}
-          aria-label={`Progress notes for ${task.description}${noteCount > 0 ? ` (${noteCount})` : ""}`}
-          title="Progress notes"
+          className={`notes-btn${hasDetail ? " has-notes" : ""}`}
+          aria-label={`Breakdown and progress for ${task.description}${noteSuffix}`}
+          title="Breakdown and progress"
           onClick={onOpenNotes}
         >
           📝{noteCount > 0 && <span className="notes-count">{noteCount}</span>}

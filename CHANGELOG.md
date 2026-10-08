@@ -24,8 +24,26 @@ kept current.
   the 📝 count, and opens them read-only, with "Move to Today/Tomorrow"
   buttons in the drawer to start working on it again.
 
+- The project drawer's scrim, close button, Escape-to-close and focus
+  handling moved into a shared `Drawer` component so the new task drawer
+  uses the same behavior instead of a copy of it. The positioning CSS class
+  is now `.drawer`; `.project-drawer` remains for project-only rules.
+- **Today and Tomorrow mean "now" and "next", not calendar days.** They're
+  buckets you load work into on purpose, and nothing moves in or out of
+  them because the date changed. The help page, the design doc and the tab
+  intros now say so, and the automatic day rollover TODO is rejected rather
+  than pending. (This replaces an earlier note that rollover was manual
+  "until the automatic-rollover TODO ships".)
+
 ### Added
 
+- Free-text **breakdown** on tasks, in the task drawer above the progress
+  log. This replaces the planned checklist: you structure it however you
+  like rather than being held to a list of tick-boxes. Saves itself (after
+  a pause in typing, on blur, and when the drawer closes), so there's no
+  Save button to forget. Same Plan vs Do rule as notes: editable on
+  Today/Tomorrow, read-only on Someday, never lost. New `Task.breakdown`
+  string field.
 - Progress notes on tasks. A 📝 button on each task row opens a task drawer
   where you add dated notes, so you can record how a task is going instead
   of it just being a single line. Notes are only ever added, never edited,
@@ -45,13 +63,6 @@ kept current.
   carries its own copy of the color/font tokens. Keeping it current is now
   a step in `.claude/skills/update-project-artifacts`.
 
-### Changed
-
-- The project drawer's scrim, close button, Escape-to-close and focus
-  handling moved into a shared `Drawer` component so the new task drawer
-  uses the same behavior instead of a copy of it. The positioning CSS class
-  is now `.drawer`; `.project-drawer` remains for project-only rules.
-
 ### Fixed
 
 - Pulling a task forward (e.g. Tomorrow → Today) no longer marks it
@@ -62,11 +73,6 @@ kept current.
   PWA dependency re-resolved the lockfile and dropped the top-level
   `esbuild` CDK needs for Lambda bundling; `esbuild` is now an explicit
   devDependency.
-
-### Changed
-
-- The Tomorrow tab's intro no longer implies its tasks move on their own;
-  rollover is manual until the automatic-rollover TODO ships.
 
 ## 2026-07-31
 
